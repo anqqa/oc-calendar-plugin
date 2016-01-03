@@ -4,6 +4,7 @@ use Carbon\Carbon;
 use Cms\Classes\Page;
 use Cms\Classes\ComponentBase;
 use Klubitus\Calendar\Models\Event as EventModel;
+use October\Rain\Support\Collection;
 
 
 class Events extends ComponentBase {
@@ -28,6 +29,11 @@ class Events extends ComponentBase {
      */
     public $events;
 
+    /**
+     * @var  string  Paginated events page name reference.
+     */
+    public $paginationPage;
+
 
     public function componentDetails() {
         return [
@@ -42,6 +48,11 @@ class Events extends ComponentBase {
             'eventPage' => [
                 'title'       => 'Event Page',
                 'description' => 'Page name for a single event.',
+                'type'        => 'dropdown',
+            ],
+            'paginationPage' => [
+                'title'       => 'Pagination Page',
+                'description' => 'Page name for paginated events.',
                 'type'        => 'dropdown',
             ],
             'datePeriod' => [
@@ -88,8 +99,12 @@ class Events extends ComponentBase {
     }
 
 
-    public function getEventPageOptions() {
-        return Page::sortBy('baseFileName')->lists('baseFileName', 'baseFileName');
+    public function getPropertyOptions($property) {
+        if ($property == 'eventPage' || $property == 'paginationPage') {
+            return Page::sortBy('baseFileName')->lists('baseFileName', 'baseFileName');
+        }
+
+        return self::getPropertyOptions($property);
     }
 
 
@@ -98,7 +113,13 @@ class Events extends ComponentBase {
             return $this->events;
         }
 
+        /** @var  Collection  $events */
         $events = EventModel::week($this->date);
+
+        // Add url
+        $events->each(function(EventModel $event) {
+            $event->setUrl($this->eventPage, $this->controller);
+        });
 
         return $this->events = $events;
     }
@@ -112,26 +133,83 @@ class Events extends ComponentBase {
 
 
     public function prepareVars() {
+        $this->eventPage      = $this->page['eventPage']      = $this->property('eventPage');
+        $this->paginationPage = $this->page['paginationPage'] = $this->property('paginationPage');
+
+        // Parse date period, default to current week
         $year  = $this->property('year');
         $month = $this->property('month');
         $day   = $this->property('day');
         $week  = $this->property('week');
-        $date  = Carbon::create($year, $month, $day);
 
-        if ($day) {
-            $range = 'day';
-        } else if ($month) {
-            $range = 'month';
-        } else if ($week) {
-            $range = 'week';
-            $date  = $date->startOfYear()->addWeeks($week - 1);
-        } else if ($year) {
-            $range = 'year';
-        } else {
-            $range = 'week';
+        if (!$year) {
+            $date = Carbon::create()->startOfWeek();
+            $week = $date->weekOfYear;
+        }
+        else {
+            $date = Carbon::create($year, $month, $day);
         }
 
-        $this->date = $date;
-        $this->eventPage = $this->page['eventPage'] = $this->property('eventPage');
+        if ($day) {
+            $previousDate = $date->copy()->subDay();
+            $previousText = 'Previous day';
+            $previousUrl  = $this->controller->pageUrl($this->paginationPage, [
+                'year'  => $previousDate->year,
+                'month' => $previousDate->month,
+                'day'   => $previousDate->day,
+            ]);
+            $nextDate = $date->copy()->addDay();
+            $nextText = 'Next day';
+            $nextUrl  = $this->controller->pageUrl($this->paginationPage, [
+                'year'  => $nextDate->year,
+                'month' => $nextDate->month,
+                'day'   => $nextDate->day,
+            ]);
+        } else if ($month) {
+            $previousDate = $date->copy()->subMonth();
+            $previousText = 'Previous month';
+            $previousUrl  = $this->controller->pageUrl($this->paginationPage, [
+                'year'  => $previousDate->year,
+                'month' => $previousDate->month,
+            ]);
+            $nextDate = $date->copy()->addDay();
+            $nextText = 'Next month';
+            $nextUrl  = $this->controller->pageUrl($this->paginationPage, [
+                'year'  => $nextDate->year,
+                'month' => $nextDate->month,
+            ]);
+        } else if ($week) {
+            $date->startOfYear();
+
+            // Is the first day of the year in the last week of last year?
+            if ($date->weekOfYear != 1) {
+                $date->addWeek();
+            }
+
+            if ($week > 1) {
+                $date->addWeeks($week - 1);
+            }
+
+            $previousDate = $date->copy()->subWeek();
+            $previousText = 'Previous week';
+            $previousUrl  = $this->controller->pageUrl($this->paginationPage, [
+                'year' => $previousDate->year,
+                'week' => $previousDate->weekOfYear,
+            ]);
+            $nextDate = $date->copy()->addWeek();
+            $nextText = 'Next week';
+            $nextUrl  = $this->controller->pageUrl($this->paginationPage, [
+                'year' => $nextDate->year,
+                'week' => $nextDate->weekOfYear,
+            ]);
+        } else {
+            return;
+        }
+
+        $this->date = $this->page['date'] = $date;
+        $this->page['pagination'] = compact(
+            'previousDate', 'previousText', 'previousUrl',
+            'nextDate', 'nextText', 'nextUrl'
+        );
     }
 }

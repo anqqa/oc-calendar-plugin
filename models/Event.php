@@ -1,10 +1,12 @@
 <?php namespace Klubitus\Calendar\Models;
 
 use Carbon\Carbon;
+use Cms\Classes\Controller;
 use Illuminate\Support\Facades\DB;
 use Model;
 use October\Rain\Database\QueryBuilder;
 use October\Rain\Exception\SystemException;
+use October\Rain\Support\Str;
 
 
 /**
@@ -124,4 +126,18 @@ class Event extends Model {
         return $this->scopeBetween($query, $from, $from->copy()->endOfWeek());
     }
 
+
+    /**
+     * Set current object url.
+     *
+     * @param  string      $pageName
+     * @param  Controller  $controller
+     */
+    public function setUrl($pageName, Controller $controller) {
+        $params = [
+            'event_id' => $this->id . '-' . Str::slug($this->name)
+        ];
+
+        return $this->url = $controller->pageUrl($pageName, $params);
+    }
 }
