@@ -30,6 +30,11 @@ class Events extends ComponentBase {
     public $events;
 
     /**
+     * @var  string
+     */
+    public $pageTitle;
+
+    /**
      * @var  string  Paginated events page name reference.
      */
     public $paginationPage;
@@ -116,8 +121,9 @@ class Events extends ComponentBase {
         /** @var  Collection  $events */
         $events = EventModel::week($this->date);
 
-        // Add url
+        // Add date and url
         $events->each(function(EventModel $event) {
+            $event->date = $event->begins_at->toDateString();
             $event->setUrl($this->eventPage, $this->controller);
         });
 
@@ -165,6 +171,8 @@ class Events extends ComponentBase {
                 'month' => $nextDate->month,
                 'day'   => $nextDate->day,
             ]);
+
+            $title = 'Events ' . $date->format("l, F j Y");
         } else if ($month) {
             $previousDate = $date->copy()->subMonth();
             $previousText = 'Previous month';
@@ -178,6 +186,8 @@ class Events extends ComponentBase {
                 'year'  => $nextDate->year,
                 'month' => $nextDate->month,
             ]);
+
+            $title = 'Events ' . $date->format("F Y");
         } else if ($week) {
             $date->startOfYear();
 
@@ -189,6 +199,8 @@ class Events extends ComponentBase {
             if ($week > 1) {
                 $date->addWeeks($week - 1);
             }
+
+            $date->startOfWeek();
 
             $previousDate = $date->copy()->subWeek();
             $previousText = 'Previous week';
@@ -202,10 +214,25 @@ class Events extends ComponentBase {
                 'year' => $nextDate->year,
                 'week' => $nextDate->weekOfYear,
             ]);
+
+            $firstDay = $date->copy()->startOfWeek();
+            $lastDay  = $firstDay->copy()->addDays(6);
+            if ($firstDay->year != $lastDay->year) {
+                $from = $firstDay->format('j.n.Y');
+            }
+            else if ($firstDay->month != $lastDay->month) {
+                $from = $firstDay->format('j.n.');
+            }
+            else {
+                $from = $firstDay->format('j.');
+            }
+            $title = 'Events ' . $from . ' - ' . $lastDay->format('j.n.Y');
+
         } else {
             return;
         }
 
+        $this->pageTitle = $this->page['title'] = $title;
         $this->date = $this->page['date'] = $date;
         $this->page['pagination'] = compact(
             'previousDate', 'previousText', 'previousUrl',

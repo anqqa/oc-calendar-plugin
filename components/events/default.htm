@@ -1,7 +1,34 @@
-<div class="calendar-events">
+{% set date = null %}
+
+<section class="events events--detailed">
 
     {% for event in events %}
-        <a href="{{ event.url }}">{{ event.name }}</a><br>
+
+        {% if event.date != date %}
+            {% set date = event.date %}
+
+            <h2>{{ event.begins_at | date("l, F j") }}</h2>
+        {% endif %}
+
+        <article class="event">
+            <header>
+                <h3>
+                    <a href="{{ event.url }}">{{ event.name }}</a>
+                </h3>
+                <div class="event__location">
+                    {{ event.venue_name }}, {{ event.city_name }}
+                </div>
+            </header>
+
+            <p class="event__info">
+                {{ event.info }}
+            </p>
+
+            <small class="meta event__meta">
+                {{ event.music }}
+            </small>
+        </article>
+
     {% endfor %}
 
-</div>
+</section>
