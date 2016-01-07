@@ -1,11 +1,11 @@
 <?php namespace Klubitus\Calendar\Models;
 
+use ApplicationException;
 use Carbon\Carbon;
 use Cms\Classes\Controller;
 use Illuminate\Support\Facades\DB;
 use Model;
 use October\Rain\Database\QueryBuilder;
-use October\Rain\Exception\SystemException;
 use October\Rain\Support\Str;
 
 
@@ -101,7 +101,7 @@ class Event extends Model {
      * @param   int           $week  Week number if year is int
      * @return  QueryBuilder
      *
-     * @throws  SystemException  on missing parameters
+     * @throws  ApplicationException  on missing parameters
      */
     public function scopeWeek($query, $year, $week = null) {
         if ($year instanceof Carbon) {
@@ -120,7 +120,7 @@ class Event extends Model {
             }
         }
         else {
-            throw new SystemException('Week missing');
+            throw new ApplicationException('Week missing');
         }
 
         return $this->scopeBetween($query, $from, $from->copy()->endOfWeek());
