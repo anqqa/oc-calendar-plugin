@@ -216,17 +216,37 @@ class Events extends ComponentBase {
             ]);
 
             $firstDay = $date->copy()->startOfWeek();
-            $lastDay  = $firstDay->copy()->addDays(6);
-            if ($firstDay->year != $lastDay->year) {
-                $from = $firstDay->format('j.n.Y');
+            $weekDate = $firstDay->format('Y-m-d');
+            $thisWeek = Carbon::create()->startOfWeek();
+            switch ($weekDate) {
+
+                case $thisWeek->format('Y-m-d'):
+                    $title = 'Events this week';
+                    break;
+
+                case $thisWeek->addWeek()->format('Y-m-d'):
+                    $title = 'Events next week';
+                    break;
+
+                case $thisWeek->subWeeks(2)->format('Y-m-d'):
+                    $title = 'Events last week';
+                    break;
+
+                default:
+                    $lastDay  = $firstDay->copy()->addDays(6);
+                    if ($firstDay->year != $lastDay->year) {
+                        $from = $firstDay->format('j.n.Y');
+                    }
+                    else if ($firstDay->month != $lastDay->month) {
+                        $from = $firstDay->format('j.n.');
+                    }
+                    else {
+                        $from = $firstDay->format('j.');
+                    }
+
+                    $title = 'Events ' . $from . ' - ' . $lastDay->format('j.n.Y');
+
             }
-            else if ($firstDay->month != $lastDay->month) {
-                $from = $firstDay->format('j.n.');
-            }
-            else {
-                $from = $firstDay->format('j.');
-            }
-            $title = 'Events ' . $from . ' - ' . $lastDay->format('j.n.Y');
 
         } else {
             return;
