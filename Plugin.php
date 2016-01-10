@@ -35,7 +35,8 @@ class Plugin extends PluginBase {
      */
     public function registerComponents() {
         return [
-            'Klubitus\Calendar\Components\Events' => 'calendarEvents',
+            'Klubitus\Calendar\Components\Events'    => 'calendarEvents',
+            'Klubitus\Calendar\Components\EventList' => 'calendarEventList',
         ];
     }
 
@@ -49,11 +50,26 @@ class Plugin extends PluginBase {
         return [
             'calendar' => [
                 'label'       => 'Calendar',
-                'url'         => Backend::url('klubitus/calendar/mycontroller'),
+                'url'         => Backend::url('klubitus/calendar/facebookimport'),
                 'icon'        => 'icon-calendar',
                 'permissions' => ['klubitus.calendar.*'],
-                'order'       => 500,
+                'order'       => 100,
             ],
+        ];
+    }
+
+
+    public function registerSettings() {
+        return [
+            'settings' => [
+                'label'       => 'Calendar settings',
+                'description' => 'Manage calendar settings.',
+                'category'    => 'Klubitus',
+                'icon'        => 'icon-calendar',
+                'class'       => 'Klubitus\Calendar\Models\Settings',
+                'order'       => 100,
+                'permissions' => ['rainlab.users.settings']
+            ]
         ];
     }
 

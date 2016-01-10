@@ -1,0 +1,20 @@
+# ===================================
+#  Form Field Definitions
+# ===================================
+
+tabs:
+    fields:
+
+        facebook_import_enabled:
+            span: left
+            label: Import enabled
+            comment: Import Facebook events from iCal.
+            type: switch
+            tab: Facebook
+
+        facebook_import_url:
+            label: iCal URL
+            comment: Upcoming Events in right column at https://www.facebook.com/events/upcoming
+            type: text
+            placeholder: webcal://
+            tab: Facebook

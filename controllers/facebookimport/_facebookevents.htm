@@ -1,0 +1,51 @@
+<table class="table data">
+    <thead>
+        <tr>
+            <th class="list-checkbox">
+                <div class="checkbox custom-checkbox nolabel">
+                    <input type="checkbox" id="checkboxAll">
+                    <label for="checkboxAll"></label>
+                </div>
+            </th>
+            <th><span>Time</span></th>
+            <th><span>Name</span></th>
+            <th><span>Location</span></th>
+            <th><span>Organizer</span></th>
+            <th><span>URL</span></th>
+            <th><span>Description</span></th>
+        </tr>
+    </thead>
+    <tbody>
+
+        <?php foreach ($events as $event): ?>
+            <tr>
+                <td class="list-checkbox nolink">
+                    <div class="checkbox custom-checkbox nolabel">
+                        <input type="checkbox" name="checked[]" value="<?= $event['UID'] ?>">
+                        <label></label>
+                    </div>
+                </td>
+                <td>
+                    <nobr>
+                        <?= $event['DTSTART']->timezone('Europe/Helsinki') ?><br>
+                        <?= $event['DTEND']->timezone('Europe/Helsinki') ?><br>
+                        <br>
+                        Created:<br>
+                        <?= $event['CREATED']->timezone('Europe/Helsinki') ?><br>
+                        Modified:<br>
+                        <?= $event['DTSTAMP']->timezone('Europe/Helsinki') ?>
+                    </nobr>
+                </td>
+                <td><?= $event['SUMMARY'] ?></td>
+                <td><?= $event['LOCATION'] ?></td>
+                <td>
+                    <?= $event['ORGANIZER']['properties']['CN'] ?>,<br>
+                    <?= $event['ORGANIZER']['value'] ?>
+                </td>
+                <td><?= $event['URL'] ?></td>
+                <td><?= str_replace('\n', '<br>', $event['DESCRIPTION']) ?></td>
+            </tr>
+        <?php endforeach ?>
+
+    </tbody>
+</table>
