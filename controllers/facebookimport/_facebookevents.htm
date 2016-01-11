@@ -1,3 +1,24 @@
+<div class="scoreboard">
+    <div date-control="toolbar">
+
+        <div class="scoreboard-item title-value">
+            <h4>Added</h4>
+            <p class="positive"><?= $added ?></p>
+        </div>
+
+        <div class="scoreboard-item title-value">
+            <h4>Updated</h4>
+            <p><?= $updated ?></p>
+        </div>
+
+        <div class="scoreboard-item title-value">
+            <h4>Skipped</h4>
+            <p><?= $skipped ?></p>
+        </div>
+
+    </div>
+</div>
+
 <table class="table data">
     <thead>
         <tr>
@@ -12,12 +33,12 @@
             <th><span>Location</span></th>
             <th><span>Organizer</span></th>
             <th><span>URL</span></th>
-            <th><span>Description</span></th>
+<!--            <th><span>Description</span></th>-->
         </tr>
     </thead>
     <tbody>
 
-        <?php foreach ($events as $event): ?>
+        <?php foreach ($imported as $event): ?>
             <tr>
                 <td class="list-checkbox nolink">
                     <div class="checkbox custom-checkbox nolabel">
@@ -27,23 +48,25 @@
                 </td>
                 <td>
                     <nobr>
-                        <?= $event['DTSTART']->timezone('Europe/Helsinki') ?><br>
-                        <?= $event['DTEND']->timezone('Europe/Helsinki') ?><br>
+                        <?= $event->begins_at ?><br>
+                        <?= $event->ends_at ?><br>
                         <br>
                         Created:<br>
-                        <?= $event['CREATED']->timezone('Europe/Helsinki') ?><br>
+                        <?= $event->created_at ?><br>
                         Modified:<br>
-                        <?= $event['DTSTAMP']->timezone('Europe/Helsinki') ?>
+                        <?= $event->updated_at ?>
                     </nobr>
                 </td>
-                <td><?= $event['SUMMARY'] ?></td>
-                <td><?= $event['LOCATION'] ?></td>
+                <td><?= $event->name ?></td>
+                <td><?= $event->venue_name ?></td>
                 <td>
-                    <?= $event['ORGANIZER']['properties']['CN'] ?>,<br>
-                    <?= $event['ORGANIZER']['value'] ?>
+                    <?= $event->facebook_organizer ?>
                 </td>
-                <td><?= $event['URL'] ?></td>
-                <td><?= str_replace('\n', '<br>', $event['DESCRIPTION']) ?></td>
+                <td>
+                    <?= $event->url ?><br>
+                    Facebook Id: <?= $event->facebook_id ?>
+                </td>
+<!--                <td><?= str_replace('\n', '<br>', $event->info) ?></td>-->
             </tr>
         <?php endforeach ?>
 

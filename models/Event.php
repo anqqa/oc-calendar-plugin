@@ -28,6 +28,7 @@ class Event extends Model {
      * @var  array  Fillable fields
      */
     protected $fillable = [
+        'updated_at',
         'begins_at',
         'ends_at',
         'name',
@@ -42,6 +43,8 @@ class Event extends Model {
         'venue_url',
         'venue_hidden',
         'city_name',
+        'facebook_id',
+        'facebook_organizer',
     ];
 
     protected $dates = ['begins_at', 'ends_at'];
@@ -69,8 +72,8 @@ class Event extends Model {
      */
     public $rules = [
         'begins_at' => 'required',
-        'ends_at' => 'required',
-        'name' => 'required',
+        'ends_at'   => 'required',
+        'name'      => 'required',
     ];
 
 
@@ -89,6 +92,18 @@ class Event extends Model {
             ->where('ends_at', '>=', $from->copy()->addHours(5)) // Only get after 5am
             ->orderBy(DB::raw("date_trunc('day', begins_at)"), 'ASC')
             ->orderBy('city_name', 'ASC');
+    }
+
+
+    /**
+     * Get events by Facebook event id.
+     *
+     * @param   QueryBuilder  $query
+     * @param   array         $facebookIds
+     * @return  QueryBuilder
+     */
+    public function scopeFacebook($query, array $facebookIds) {
+        return $query->whereIn('facebook_id', $facebookIds);
     }
 
 

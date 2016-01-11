@@ -2,25 +2,22 @@
 
 use Cache;
 use Carbon\Carbon;
+use Klubitus\Calendar\Models\Event;
 use October\Rain\Exception\SystemException;
 use October\Rain\Network\Http;
 
+
 class VCalendar {
-
-    private static function parseDate($dateString) {
-        return Carbon::createFromFormat('Ymd\THis\Z', $dateString, 'Europe/London');
-    }
-
 
     /**
      * Load vCalendar from URL and parse into an array.
      *
-     * @param  string  $url
-     * @param  bool    $skipCache
+     * @param   string  $url
+     * @param   bool    $skipCache
      * @return  array
      * @throws  SystemException
      */
-    public static function parseEventsFrom($url, $skipCache = false) {
+    public static function getFromUrl($url, $skipCache = false) {
         $url = str_replace('webcal://', 'https://', $url);
         $cacheKey = 'VCalendar::' . md5($url);
         $vcalendar = $skipCache ? null : Cache::get($cacheKey);
@@ -74,6 +71,9 @@ class VCalendar {
             if (in_array($property, [ 'CREATED', 'DTEND', 'DTSTAMP', 'DTSTART', 'LAST-MODIFIED' ])) {
                 $value = self::parseDate($value);
             }
+            elseif ($property == 'UID') {
+                $event['ID'] = self::parseId($value);
+            }
 
             if (count($propertyParts)) {
                 $properties = [];
@@ -95,6 +95,72 @@ class VCalendar {
         }
 
         return $events;
+    }
+
+
+    /**
+     * Parse vCalendar date string to Carbon.
+     *
+     * @param   string  $dateString
+     * @return  Carbon
+     */
+    private static function parseDate($dateString) {
+        return Carbon::createFromFormat('Ymd\THis\Z', $dateString, 'Europe/London');
+    }
+
+
+    /**
+     * Parse Event model from vEvent array.
+     *
+     * @param   array $eventArray
+     * @return  Event
+     */
+    public static function parseEvent(array $eventArray) {
+        $event = Event::make([
+            'name'               => $eventArray['SUMMARY'],
+            'url'                => $eventArray['URL'],
+            'begins_at'          => $eventArray['DTSTART']->timezone('Europe/Helsinki'),
+            'ends_at'            => $eventArray['DTEND']->timezone('Europe/Helsinki'),
+            'info'               => $eventArray['DESCRIPTION'],
+            'updated_at'         => $eventArray['DTSTAMP'],
+            'venue_name'         => $eventArray['LOCATION'],
+            'facebook_id'        => $eventArray['ID'],
+            'facebook_organizer' => $eventArray['ORGANIZER']['properties']['CN'],
+        ]);
+
+        return $event;
+    }
+
+
+    /**
+     * Parse Event models from vEvents array.
+     *
+     * @param   array $eventsArray
+     * @return  Event[]
+     */
+    public static function parseEvents(array $eventsArray) {
+        $events = [];
+
+        foreach ($eventsArray as $event) {
+            $events[$event['ID']] = self::parseEvent($event);
+        }
+
+        return $events;
+    }
+
+
+    /**
+     * Parse Facebook event id from uid.
+     *
+     * @param   string  $uid
+     * @return  string
+     */
+    public static function parseId($uid) {
+        if (preg_match('/^e(\d+)@/', $uid, $matches)) {
+            return $matches[1];
+        }
+
+        return null;
     }
 
 }

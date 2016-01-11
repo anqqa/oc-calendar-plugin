@@ -14,6 +14,8 @@ class CreateEventsTable extends Migration {
             $table->timestamp('begins_at');
             $table->timestamp('ends_at');
             $table->foreign('author_id')->references('id')->on('users');
+            $table->bigInteger('facebook_id')->nullable()->unique();
+            $table->string('facebook_organizer')->nullable();
 
             $table->string('name', 64);
             $table->string('url')->nullable();
