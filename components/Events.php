@@ -1,13 +1,18 @@
 <?php namespace Klubitus\Calendar\Components;
 
 use Carbon\Carbon;
-use Cms\Classes\Page;
 use Cms\Classes\ComponentBase;
+use Cms\Classes\Page;
 use Klubitus\Calendar\Models\Event as EventModel;
 use October\Rain\Support\Collection;
 
 
 class Events extends ComponentBase {
+
+    const PERIOD_DAY   = 'day';
+    const PERIOD_WEEK  = 'week';
+    const PERIOD_MONTH = 'month';
+
 
     /**
      * @var  Carbon  Active date
@@ -65,7 +70,11 @@ class Events extends ComponentBase {
                 'description' => 'Time period to list evens for given date.',
                 'default'     => 'week',
                 'type'        => 'dropdown',
-                'options'     => [ 'day', 'week', 'month' ],
+                'options'     => [
+                    self::PERIOD_DAY   => 'day',
+                    self::PERIOD_WEEK  => 'week',
+                    self::PERIOD_MONTH => 'month'
+                ],
 //                'group'       => 'Date',
             ],
             'day' => [
@@ -119,7 +128,7 @@ class Events extends ComponentBase {
         }
 
         /** @var  Collection  $events */
-        $events = EventModel::week($this->date);
+        $events = EventModel::week($this->date)->get();
 
         // Add date and url
         $events->each(function(EventModel $event) {

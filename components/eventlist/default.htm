@@ -1,3 +1,15 @@
-<p>This is the default markup for component EventList</p>
+<section class="events events--list">
+    <h2>{{ __SELF__.title }}</h2>
 
-<small>You can delete this file if you want</small>
+    <ol>
+        {% for event in __SELF__.events %}
+
+            <li>
+                <a href="{{ event.url }}">
+                    <span class="date">{{ event.begins_at|date("d.m.") }}</span><span class="title">{{ event.name }}</span>
+                </a>
+            </li>
+
+        {% endfor %}
+    </ol>
+</section>
