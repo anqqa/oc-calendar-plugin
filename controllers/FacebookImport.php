@@ -63,6 +63,11 @@ class FacebookImport extends Controller {
             return;
         }
 
+        $this->vars['added']   = 0;
+        $this->vars['updated'] = 0;
+        $this->vars['skipped'] = 0;
+        $this->vars['imported'] = [];
+
         try {
             $vevents = VCalendar::getFromUrl($this->importUrl, true);
             if (!$vevents) {
@@ -89,11 +94,11 @@ class FacebookImport extends Controller {
                 if ($existingEvent) {
                     if ($event->updated_at > $existingEvent->updated_at) {
                         $existingEvent->fill([
-                            'name'       => $event->name,
-                            'url'        => $event->url,
-                            'begins_at'  => $event->begins_at,
-                            'ends_at'    => $event->ends_at,
-                            'info'       => $event->info,
+                            'name'      => $event->name,
+                            'url'       => $event->url,
+                            'begins_at' => $event->begins_at,
+                            'ends_at'   => $event->ends_at,
+                            'info'      => $event->info,
                         ]);
                         $this->updateEvent($existingEvent);
 
@@ -115,7 +120,7 @@ class FacebookImport extends Controller {
                 }
             }
 
-            $this->vars['added'] = $added;
+            $this->vars['added']   = $added;
             $this->vars['updated'] = $updated;
             $this->vars['skipped'] = $skipped;
 
