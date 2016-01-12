@@ -156,10 +156,12 @@ class FacebookImport extends Controller {
 
         $placeObject = $eventObject->getPlace();
         if ($placeObject) {
-            $locationObject = $placeObject->getLocation();
-
             $event->venue_name = $placeObject->getName();
-            $event->city_name = $locationObject->getCity();
+
+            $locationObject = $placeObject->getLocation();
+            if ($locationObject) {
+                $event->city_name = $locationObject->getCity();
+            }
         }
     }
 
