@@ -67,12 +67,25 @@ class VCalendar {
             $propertyParts = explode(';', $property);
             $property = array_shift($propertyParts);
 
-            // Parse dates
-            if (in_array($property, [ 'CREATED', 'DTEND', 'DTSTAMP', 'DTSTART', 'LAST-MODIFIED' ])) {
-                $value = self::parseDate($value);
-            }
-            elseif ($property == 'UID') {
-                $event['ID'] = self::parseId($value);
+            // Parse data
+            switch ($property) {
+
+                case 'CREATED':
+                case 'DTEND':
+                case 'DTSTAMP':
+                case 'DTSTART':
+                case 'LAST-MODIFIED':
+                    $value = self::parseDate($value);
+                    break;
+
+                case 'UID':
+                    $event['ID'] = self::parseId($value);
+                    break;
+
+                case 'DESCRIPTION':
+                    $value = str_replace('\n', "\n", $value);
+                    break;
+
             }
 
             if (count($propertyParts)) {
@@ -119,13 +132,14 @@ class VCalendar {
         $event = Event::make([
             'name'               => $eventArray['SUMMARY'],
             'url'                => $eventArray['URL'],
-            'begins_at'          => $eventArray['DTSTART']->timezone('Europe/Helsinki'),
-            'ends_at'            => $eventArray['DTEND']->timezone('Europe/Helsinki'),
-            'info'               => $eventArray['DESCRIPTION'],
+            'begins_at'          => $eventArray['DTSTART'],
+            'ends_at'            => $eventArray['DTEND'],
+            'info'               => $eventArray['DESCRIPTION'] ?: null,
             'updated_at'         => $eventArray['DTSTAMP'],
-            'venue_name'         => $eventArray['LOCATION'],
+            'venue_name'         => $eventArray['LOCATION'] ?: null,
             'facebook_id'        => $eventArray['ID'],
             'facebook_organizer' => $eventArray['ORGANIZER']['properties']['CN'],
+            'price'              => null,
         ]);
 
         return $event;

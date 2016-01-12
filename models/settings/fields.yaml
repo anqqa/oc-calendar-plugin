@@ -18,3 +18,9 @@ tabs:
             type: text
             placeholder: webcal://
             tab: Facebook
+
+        facebook_import_user_id:
+            label: Importing user id
+            comment: The owning user of the imported events.
+            type: number
+            tab: Facebook

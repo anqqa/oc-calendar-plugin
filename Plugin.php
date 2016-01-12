@@ -20,7 +20,7 @@ class Plugin extends PluginBase {
     public function pluginDetails() {
         return [
             'name'        => 'Klubitus Calendar',
-            'description' => 'Calendar plugin for Klubitus',
+            'description' => 'Events calendar for Klubitus.',
             'author'      => 'Antti Qvickström',
             'icon'        => 'icon-calendar',
             'homepage'    => 'https://github.com/anqqa/klubitus-octobercms-plugins',
@@ -68,7 +68,6 @@ class Plugin extends PluginBase {
                 'icon'        => 'icon-calendar',
                 'class'       => 'Klubitus\Calendar\Models\Settings',
                 'order'       => 100,
-                'permissions' => ['rainlab.users.settings']
             ]
         ];
     }

@@ -6,8 +6,10 @@ use Flash;
 use Klubitus\Calendar\Classes\VCalendar;
 use Klubitus\Calendar\Models\Event as EventModel;
 use Klubitus\Calendar\Models\Settings as CalendarSettings;
+use Klubitus\Facebook\Classes\GraphAPI;
 use October\Rain\Exception\SystemException;
 use October\Rain\Support\Arr;
+use RainLab\User\Models\User as UserModel;
 use System\Classes\SettingsManager;
 
 
@@ -15,8 +17,22 @@ use System\Classes\SettingsManager;
  * Facebook Import Back-end Controller
  */
 class FacebookImport extends Controller {
+
+    /**
+     * @var  bool
+     */
     public $importEnabled;
+
+    /**
+     * @var  string
+     */
     public $importUrl;
+
+    /**
+     * @var  UserModel
+     */
+    public $importUser;
+
 
     public function __construct() {
         parent::__construct();
@@ -26,6 +42,7 @@ class FacebookImport extends Controller {
 
         $this->vars['importEnabled'] = $this->importEnabled = (bool)CalendarSettings::get('facebook_import_enabled');
         $this->vars['importUrl'] = $this->importUrl = CalendarSettings::get('facebook_import_url');
+        $this->vars['importUser'] = $this->importUser = UserModel::find(CalendarSettings::get('facebook_import_user_id'));
     }
 
 
@@ -40,8 +57,8 @@ class FacebookImport extends Controller {
 
 
     public function index_onFacebookImport() {
-        if (!$this->importUrl) {
-            Flash::error('Facebook import URL is required.');
+        if (!$this->importUrl || !$this->importUser) {
+            Flash::error('Facebook import URL and user are required.');
 
             return;
         }
@@ -77,10 +94,11 @@ class FacebookImport extends Controller {
                             'begins_at'  => $event->begins_at,
                             'ends_at'    => $event->ends_at,
                             'info'       => $event->info,
-                            'venue_name' => $event->venue_name,
                         ]);
+                        $this->updateEvent($existingEvent);
 
                         $existingEvent->save();
+
                         $updated++;
                     }
                     else {
@@ -88,6 +106,9 @@ class FacebookImport extends Controller {
                     }
                 }
                 else {
+                    $this->updateEvent($event);
+                    $event->author()->associate($this->importUser);
+
                     $event->save();
 
                     $added++;
@@ -103,4 +124,38 @@ class FacebookImport extends Controller {
             Flash::error($e->getMessage());
         }
     }
+
+
+    /**
+     * Update Event with missing data using GraphAPI.
+     *
+     * @param   EventModel  $event
+     * @throws  SystemException
+     */
+    protected function updateEvent(EventModel $event) {
+        $accessToken = GraphAPI::instance()->appAccessToken();
+        try {
+            $response = GraphAPI::instance()->get('/' . $event->facebook_id, [ 'cover', 'place', 'ticket_uri' ], $accessToken);
+        }
+        catch (SystemException $e) {
+            Flash::error($e->getMessage());
+
+            return;
+        }
+
+        $eventObject = $response->getGraphEvent();
+        $coverObject = $eventObject->getCover();
+
+        $event->ticket_url = $eventObject->getTicketUri();
+        $event->flyer_front_url = $coverObject->getSource();
+
+        $placeObject = $eventObject->getPlace();
+        if ($placeObject) {
+            $locationObject = $placeObject->getLocation();
+
+            $event->venue_name = $placeObject->getName();
+            $event->city_name = $locationObject->getCity();
+        }
+    }
+
 }
