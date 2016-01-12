@@ -38,6 +38,7 @@ class Event extends Model {
         'price',
         'info',
         'music',
+        'flyer_url',
         'flyer_front_url',
         'venue_name',
         'venue_url',

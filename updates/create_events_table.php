@@ -23,6 +23,7 @@ class CreateEventsTable extends Migration {
             $table->text('info')->nullable();
             $table->text('music')->nullable();
             $table->integer('flyer_id')->nullable(); // @TODO: Move to flyers plugin
+            $table->string('flyer_url')->nullable();
             $table->string('flyer_front_url')->nullable();
 
             $table->string('venue_id')->nullable(); // @TODO: Move to venues plugin

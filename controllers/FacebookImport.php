@@ -147,7 +147,7 @@ class FacebookImport extends Controller {
         $coverObject = $eventObject->getCover();
 
         $event->ticket_url = $eventObject->getTicketUri();
-        $event->flyer_front_url = $coverObject->getSource();
+        $event->flyer_url = $event->flyer_front_url = $coverObject->getSource();
 
         $placeObject = $eventObject->getPlace();
         if ($placeObject) {
