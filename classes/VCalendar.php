@@ -153,13 +153,7 @@ class VCalendar {
      * @return  Event[]
      */
     public static function parseEvents(array $eventsArray) {
-        $events = [];
-
-        foreach ($eventsArray as $event) {
-            $events[$event['ID']] = self::parseEvent($event);
-        }
-
-        return $events;
+        return array_map('self::parseEvent', $eventsArray);
     }
 
 

@@ -2,18 +2,28 @@
     <div date-control="toolbar">
 
         <div class="scoreboard-item title-value">
+            <h4>Imported</h4>
+            <p><?= count($imported) ?></p>
+        </div>
+
+        <div class="scoreboard-item title-value">
             <h4>Added</h4>
-            <p class="positive"><?= $added ?></p>
+            <p class="positive"><?= count($added) ?></p>
         </div>
 
         <div class="scoreboard-item title-value">
             <h4>Updated</h4>
-            <p><?= $updated ?></p>
+            <p><?= count($updated) ?></p>
         </div>
 
         <div class="scoreboard-item title-value">
             <h4>Skipped</h4>
-            <p><?= $skipped ?></p>
+            <p><?= count($skipped) ?></p>
+        </div>
+
+        <div class="scoreboard-item title-value">
+            <h4>Ignored</h4>
+            <p class="negative"><?= count($imported) - count($added) - count($updated) - count($skipped) ?></p>
         </div>
 
     </div>
@@ -22,39 +32,21 @@
 <table class="table data">
     <thead>
         <tr>
-            <th class="list-checkbox">
-                <div class="checkbox custom-checkbox nolabel">
-                    <input type="checkbox" id="checkboxAll">
-                    <label for="checkboxAll"></label>
-                </div>
-            </th>
             <th><span>Time</span></th>
             <th><span>Name</span></th>
             <th><span>Location</span></th>
             <th><span>Organizer</span></th>
-            <th><span>URL</span></th>
-<!--            <th><span>Description</span></th>-->
+            <th><span>Action</span></th>
         </tr>
     </thead>
     <tbody>
 
         <?php foreach ($imported as $event): ?>
             <tr>
-                <td class="list-checkbox nolink">
-                    <div class="checkbox custom-checkbox nolabel">
-                        <input type="checkbox" name="checked[]" value="<?= $event['UID'] ?>">
-                        <label></label>
-                    </div>
-                </td>
                 <td>
                     <nobr>
                         <?= $event->begins_at ?><br>
-                        <?= $event->ends_at ?><br>
-                        <br>
-                        Created:<br>
-                        <?= $event->created_at ?><br>
-                        Modified:<br>
-                        <?= $event->updated_at ?>
+                        <?= $event->ends_at ?>
                     </nobr>
                 </td>
                 <td><?= $event->name ?></td>
@@ -63,10 +55,16 @@
                     <?= $event->facebook_organizer ?>
                 </td>
                 <td>
-                    <?= $event->url ?><br>
-                    Facebook Id: <?= $event->facebook_id ?>
+                    <?php if (isset($added[$event->facebook_id])): ?>
+                    <span class="oc-icon-angle-double-up text-success">Added</span>
+                    <?php elseif (isset($updated[$event->facebook_id])): ?>
+                    <span class="oc-icon-angle-up text-info">Updated</span>
+                    <?php elseif (isset($skipped[$event->facebook_id])): ?>
+                    <span class="oc-icon-angle-down text-muted">Skipped</span>
+                    <?php else: ?>
+                    <span class="oc-icon-angle-double-down text-danger">Ignored</span>
+                    <?php endif; ?>
                 </td>
-<!--                <td><?= str_replace('\n', '<br>', $event->info) ?></td>-->
             </tr>
         <?php endforeach ?>
 

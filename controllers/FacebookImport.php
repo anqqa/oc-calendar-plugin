@@ -2,6 +2,8 @@
 
 use BackendMenu;
 use Backend\Classes\Controller;
+use Carbon\Carbon;
+use Db;
 use Flash;
 use Klubitus\Calendar\Classes\VCalendar;
 use Klubitus\Calendar\Models\Event as EventModel;
@@ -9,6 +11,7 @@ use Klubitus\Calendar\Models\Settings as CalendarSettings;
 use Klubitus\Facebook\Classes\GraphAPI;
 use October\Rain\Exception\SystemException;
 use October\Rain\Support\Arr;
+use October\Rain\Support\Collection;
 use RainLab\User\Models\User as UserModel;
 use System\Classes\SettingsManager;
 
@@ -56,17 +59,16 @@ class FacebookImport extends Controller {
     }
 
 
-    public function index_onFacebookImport() {
+    public function index_onFacebookImport($save = true) {
         if (!$this->importUrl || !$this->importUser) {
             Flash::error('Facebook import URL and user are required.');
 
             return;
         }
 
-        $this->vars['added']   = 0;
-        $this->vars['updated'] = 0;
-        $this->vars['skipped'] = 0;
-        $this->vars['imported'] = [];
+        $this->vars['added']   = $added   = [];
+        $this->vars['updated'] = $updated = [];
+        $this->vars['skipped'] = $skipped = [];
 
         try {
             $vevents = VCalendar::getFromUrl($this->importUrl, true);
@@ -76,47 +78,65 @@ class FacebookImport extends Controller {
                 return;
             }
 
-            $this->vars['imported'] = $events = VCalendar::parseEvents($vevents);
+            $this->vars['imported'] = $events = Collection::make(VCalendar::parseEvents($vevents))->keyBy('facebook_id');
 
-            // Get existing events matching new ids
-            $existing = EventModel::facebook(array_keys($events))->get();
-            $update = [];
-            foreach ($existing as $event) {
-                $update[$event->facebook_id] = $event;
-            }
+            // We are interested only in upcoming events
+            $upcoming = $events->filter(function(EventModel $event) {
+                return $event->ends_at > Carbon::create();
+            });
 
-            $this->vars['existing'] = $existing;
+            // Get existing Facebook events
+            /** @var  Collection  $existing */
+            $existing = EventModel::upcoming()
+                ->where(function($query) use ($upcoming) {
+                    $query->facebook($upcoming->keys()->toArray())
+                        ->orWhere(DB::raw('LOWER(url)'), 'LIKE', '%facebook.com/events%');
+                })
+                ->get();
 
-            $added = $updated = $skipped = 0;
-            foreach ($events as $event) {
-                $existingEvent = Arr::get($update, $event->facebook_id);
+            /** @var  EventModel  $upcomingEvent */
+            foreach ($upcoming as $upcomingEvent) {
+                $existingEvent = $existing->first(function($key, EventModel $event) use ($upcomingEvent) {
+                    return $event->facebook_id == $upcomingEvent->facebook_id
+                        || ($event->url && strpos($event->url, $upcomingEvent->facebook_id));
+                });
 
                 if ($existingEvent) {
-                    if ($event->updated_at > $existingEvent->updated_at) {
+                    if ($upcomingEvent->updated_at > $existingEvent->updated_at) {
                         $existingEvent->fill([
-                            'name'      => $event->name,
-                            'url'       => $event->url,
-                            'begins_at' => $event->begins_at,
-                            'ends_at'   => $event->ends_at,
-                            'info'      => $event->info,
+                            'name' => $upcomingEvent->name,
+                            'url' => $upcomingEvent->url,
+                            'begins_at' => $upcomingEvent->begins_at,
+                            'ends_at' => $upcomingEvent->ends_at,
+                            'facebook_id' => $upcomingEvent->facebook_id,
+                            'facebook_organizer' => $upcomingEvent->facebook_organizer,
                         ]);
                         $this->updateEvent($existingEvent);
 
-                        $existingEvent->save();
+                        $updated[$existingEvent->facebook_id] = $existingEvent;
 
-                        $updated++;
+                        if ($save) {
+                            $existingEvent->save();
+
+                            // @TODO: Move to newsfeed plugin
+                            $this->createNewsfeedItem($existingEvent->id, false);
+                        }
                     }
                     else {
-                        $skipped++;
+                        $skipped[$existingEvent->facebook_id] = $existingEvent;
                     }
                 }
                 else {
-                    $this->updateEvent($event);
-                    $event->author()->associate($this->importUser);
+                    $this->updateEvent($upcomingEvent);
 
-                    $event->save();
+                    $added[$upcomingEvent->facebook_id] = $upcomingEvent;
 
-                    $added++;
+                    if ($save) {
+                        $upcomingEvent->save();
+
+                        // @TODO: Move to newsfeed plugin
+                        $this->createNewsfeedItem($upcomingEvent->id, true);
+                    }
                 }
             }
 
@@ -131,6 +151,22 @@ class FacebookImport extends Controller {
     }
 
 
+    public function index_onFacebookImportTest() {
+        return $this->index_onFacebookImport(false);
+    }
+
+    protected function createNewsfeedItem($eventId, $newItem = true) {
+        Db::table('newsfeeditems')->insert([
+            'user_id'   => $this->importUser->id,
+            'stamp'     => time(),
+            'class'     => 'events',
+            'type'      => $newItem ? 'event' : 'event_edit',
+            'data'      => json_encode([ 'event_id' => $eventId ]),
+            'target_id' => $eventId
+        ]);
+    }
+
+
     /**
      * Update Event with missing data using GraphAPI.
      *
@@ -140,7 +176,7 @@ class FacebookImport extends Controller {
     protected function updateEvent(EventModel $event) {
         $accessToken = GraphAPI::instance()->appAccessToken();
         try {
-            $response = GraphAPI::instance()->get('/' . $event->facebook_id, [ 'cover', 'place', 'ticket_uri' ], $accessToken);
+            $response = GraphAPI::instance()->get('/' . $event->facebook_id, [ 'cover', 'description', 'place', 'ticket_uri' ], $accessToken);
         }
         catch (SystemException $e) {
             Flash::error($e->getMessage());
@@ -151,6 +187,7 @@ class FacebookImport extends Controller {
         $eventObject = $response->getGraphEvent();
         $coverObject = $eventObject->getCover();
 
+        $event->info = $eventObject->getDescription();
         $event->ticket_url = $eventObject->getTicketUri();
         $event->flyer_url = $event->flyer_front_url = $coverObject->getSource();
 

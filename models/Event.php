@@ -146,6 +146,17 @@ class Event extends Model {
 
 
     /**
+     * Get future events.
+     *
+     * @param   QueryBuilder  $query
+     * @return  QueryBuilder
+     */
+    public function scopeUpcoming($query) {
+        return $query->where('ends_at', '>', Carbon::create());
+    }
+
+
+    /**
      * Get events by week.
      *
      * @param   QueryBuilder  $query

@@ -12,13 +12,20 @@
 
 <hr>
 
-<a href="#facebookEvents"
-   class="btn btn-primary oc-icon-download"
-   data-request="onFacebookImport"
-   data-request-update="facebookevents: '#facebook-events'">Load events</a>
+<div class="control-toolbar">
+    <div class="toolbar-item toolbar-primary">
 
-<!--<a href="facebookimport/import" class="btn btn-primary oc-icon-download">Import</a>-->
+        <a href="#facebookEvents"
+           class="btn btn-primary oc-icon-download"
+           data-request="onFacebookImport"
+           data-request-update="facebookevents: '#facebook-events'">Import events</a>
 
-<hr>
+        <a href="#facebookEvents"
+           class="btn btn-default oc-icon-download"
+           data-request="onFacebookImportTest"
+           data-request-update="facebookevents: '#facebook-events'">Import events (dry run)</a>
+
+    </div>
+</div>
 
 <div id="facebook-events"></div>
