@@ -32,7 +32,7 @@
 <table class="table data">
     <thead>
         <tr>
-            <th><span>Time</span></th>
+            <th><span>Date</span></th>
             <th><span>Name</span></th>
             <th><span>Location</span></th>
             <th><span>Organizer</span></th>
@@ -45,8 +45,7 @@
             <tr>
                 <td>
                     <nobr>
-                        <?= $event->begins_at ?><br>
-                        <?= $event->ends_at ?>
+                        <?= $event->begins_at->toFormattedDateString() ?><br>
                     </nobr>
                 </td>
                 <td><?= $event->name ?></td>
