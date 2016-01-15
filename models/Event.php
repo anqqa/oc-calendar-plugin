@@ -6,6 +6,7 @@ use Cms\Classes\Controller;
 use Illuminate\Support\Facades\DB;
 use Model;
 use October\Rain\Database\QueryBuilder;
+use October\Rain\Database\Traits\Revisionable;
 use October\Rain\Support\Str;
 
 
@@ -13,6 +14,7 @@ use October\Rain\Support\Str;
  * Event Model
  */
 class Event extends Model {
+    use Revisionable;
 
     /**
      * @var  string  The database table used by the model.
@@ -48,6 +50,8 @@ class Event extends Model {
         'facebook_organizer',
     ];
 
+    protected $revisionable = ['name', 'info'];
+
     protected $dates = ['begins_at', 'ends_at'];
 
     /**
@@ -63,7 +67,9 @@ class Event extends Model {
     public $belongsToMany = [];
     public $morphTo = [];
     public $morphOne = [];
-    public $morphMany = [];
+    public $morphMany = [
+        'revision_history' => ['System\Models\Revision', 'name' => 'revisionable'],
+    ];
     public $attachOne = [];
     public $attachMany = [];
 
