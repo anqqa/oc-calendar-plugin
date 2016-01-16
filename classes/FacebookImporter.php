@@ -132,7 +132,7 @@ class FacebookImporter {
                 }
                 else {
                     $upcomingEvent->author_id = $this->importUserId;
-                    
+
                     $error = $this->updateEvent($upcomingEvent);
                     if ($error) {
                         $errors[] = $error;
@@ -180,7 +180,11 @@ class FacebookImporter {
 
         $event->info = $eventObject->getDescription();
         $event->ticket_url = $eventObject->getTicketUri();
-        $event->flyer_url = $event->flyer_front_url = $coverObject->getSource();
+
+        // Don't update flyer if the current is uploaded rather than linked
+        if (!$event->flyer_id) {
+            $event->flyer_url = $event->flyer_front_url = $coverObject->getSource();
+        }
 
         $placeObject = $eventObject->getPlace();
         if ($placeObject) {

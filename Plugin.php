@@ -1,6 +1,9 @@
 <?php namespace Klubitus\Calendar;
 
 use Backend;
+use Illuminate\Console\Scheduling\Schedule;
+use Klubitus\Calendar\Models\Settings as CalendarSettings;
+use October\Rain\Foundation\Application;
 use System\Classes\PluginBase;
 
 
@@ -9,7 +12,10 @@ use System\Classes\PluginBase;
  */
 class Plugin extends PluginBase {
 
-    public $require = ['RainLab.User'];
+    public $require = [
+        'Klubitus.Facebook',
+        'RainLab.User'
+    ];
 
 
     /**
@@ -25,6 +31,11 @@ class Plugin extends PluginBase {
             'icon'        => 'icon-calendar',
             'homepage'    => 'https://github.com/anqqa/klubitus-octobercms-plugins',
         ];
+    }
+
+
+    public function register() {
+        $this->registerConsoleCommand('klubitus.facebookimport', 'Klubitus\Calendar\Console\FacebookImport');
     }
 
 
@@ -56,6 +67,19 @@ class Plugin extends PluginBase {
                 'order'       => 100,
             ],
         ];
+    }
+
+
+    public function registerSchedule($schedule) {
+        /** @var  Schedule  $schedule */
+        $schedule->command('klubitus:facebookimport --save')
+            ->everyTenMinutes()
+            ->when(function() {
+                return (bool)CalendarSettings::get('facebook_import_enabled');
+            })
+
+            // @TODO: Wait for update to Laravel 5.1 and change this to appendOutputTo
+            ->sendOutputTo(Application::getInstance()->storagePath() . '/logs/facebook_import.log');
     }
 
 
