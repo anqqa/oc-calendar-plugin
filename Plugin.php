@@ -14,6 +14,7 @@ class Plugin extends PluginBase {
 
     public $require = [
         'Klubitus.Facebook',
+        'Klubitus.Venue',
         'RainLab.User'
     ];
 

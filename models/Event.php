@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Model;
 use October\Rain\Database\QueryBuilder;
 use October\Rain\Database\Traits\Revisionable;
+use October\Rain\Database\Traits\Validation;
 use October\Rain\Support\Str;
 
 
@@ -14,7 +15,7 @@ use October\Rain\Support\Str;
  * Event Model
  */
 class Event extends Model {
-    use Revisionable;
+    use Revisionable, Validation;
 
     /**
      * @var  string  The database table used by the model.
@@ -63,6 +64,7 @@ class Event extends Model {
     ];
     public $belongsTo = [
         'author' => 'RainLab\User\Models\User',
+        'venue'  => 'Klubitus\Venue\Models\Venue',
     ];
     public $belongsToMany = [];
     public $morphTo = [];
@@ -73,14 +75,17 @@ class Event extends Model {
     public $attachOne = [];
     public $attachMany = [];
 
-
     /**
      * @var  array  Validation rules
      */
     public $rules = [
-        'begins_at' => 'required',
-        'ends_at'   => 'required',
-        'name'      => 'required',
+        'begins_at'       => 'required',
+        'ends_at'         => 'required',
+        'name'            => 'required',
+        'url'             => 'url',
+        'ticket_url'      => 'url',
+        'flyer_url'       => 'url',
+        'flyer_front_url' => 'url',
     ];
 
 

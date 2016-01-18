@@ -15,7 +15,7 @@ class CreateEventsTable extends Migration {
             $table->timestamp('ends_at');
             $table->foreign('author_id')->references('id')->on('users');
 
-            $table->string('name', 64);
+            $table->string('name');
             $table->string('url')->nullable();
             $table->string('ticket_url')->nullable();
             $table->integer('age')->nullable();
