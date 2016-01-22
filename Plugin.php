@@ -13,6 +13,7 @@ use System\Classes\PluginBase;
 class Plugin extends PluginBase {
 
     public $require = [
+        'Klubitus.BBCode',
         'Klubitus.Facebook',
         'Klubitus.Venue',
         'RainLab.User'

@@ -190,11 +190,11 @@ class FacebookImporter {
      * @throws  SystemException
      */
     protected function updateEvent(EventModel $event, $save) {
-        $accessToken = GraphAPI::instance()->appAccessToken();
+        $accessToken = GraphAPI::instance()->getAppAccessToken();
 
         try {
             $response = GraphAPI::instance()->get('/' . $event->facebook_id,
-                [ 'cover', 'description', 'place{id,name,location}', 'ticket_uri' ],
+                ['cover', 'description', 'place{id,name,location}', 'ticket_uri'],
                 $accessToken);
         }
         catch (SystemException $e) {
