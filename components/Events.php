@@ -10,10 +10,19 @@ use October\Rain\Support\Collection;
 
 class Events extends ComponentBase {
 
+    const PERIOD_DAY = 'day';
+    const PERIOD_WEEK = 'week';
+    const PERIOD_MONTH = 'month';
+
     /**
      * @var  Carbon  Active date
      */
     public $date;
+
+    /**
+     * @var  string
+     */
+    public $datePeriod;
 
     /**
      * @var  string  Event page name reference.
@@ -147,10 +156,12 @@ class Events extends ComponentBase {
             $week = $date->weekOfYear;
         }
         else {
-            $date = Carbon::create($year, $month, $day);
+            $date = Carbon::create($year, $month, $day ?: 1);
         }
 
         if ($day) {
+            $this->datePeriod = self::PERIOD_DAY;
+
             $previousDate = $date->copy()->subDay();
             $previousText = Lang::get('klubitus.calendar::lang.pagination.previous_day');
             $previousUrl  = $this->controller->pageUrl($this->paginationPage, [
@@ -166,9 +177,10 @@ class Events extends ComponentBase {
                 'day'   => $nextDate->day,
             ]);
 
-            $title = Lang::get('klubitus.calendar::lang.title.events_date',
-                ['date' => $date->formatLocalized("%A, %e. %B %Y")]);
+            $title = ucfirst($date->formatLocalized('%A, %e. %B %Y'));
         } else if ($month) {
+            $this->datePeriod = self::PERIOD_MONTH;
+
             $previousDate = $date->copy()->subMonth();
             $previousText = Lang::get('klubitus.calendar::lang.pagination.previous_month');
             $previousUrl  = $this->controller->pageUrl($this->paginationPage, [
@@ -182,9 +194,10 @@ class Events extends ComponentBase {
                 'month' => $nextDate->month,
             ]);
 
-            $title = Lang::get('klubitus.calendar::lang.title.events_date',
-                ['date' => $date->formatLocalized("F Y")]);
+            $title = ucfirst($date->formatLocalized('%B %Y'));
         } else if ($week) {
+            $this->datePeriod = self::PERIOD_WEEK;
+
             $date->startOfYear();
 
             // Is the first day of the year in the last week of last year?
@@ -201,13 +214,13 @@ class Events extends ComponentBase {
             $previousDate = $date->copy()->subWeek();
             $previousText = Lang::get('klubitus.calendar::lang.pagination.previous_week');
             $previousUrl  = $this->controller->pageUrl($this->paginationPage, [
-                'year' => $previousDate->year,
+                'year' => $previousDate->year + (int)($previousDate->year < $date->year && $previousDate->weekOfYear < $date->weekOfYear),
                 'week' => $previousDate->weekOfYear,
             ]);
             $nextDate = $date->copy()->addWeek();
             $nextText = Lang::get('klubitus.calendar::lang.pagination.next_week');
             $nextUrl  = $this->controller->pageUrl($this->paginationPage, [
-                'year' => $nextDate->year,
+                'year' => $nextDate->year + (int)($nextDate->year == $date->year && $nextDate->weekOfYear < $date->weekOfYear),
                 'week' => $nextDate->weekOfYear,
             ]);
 
@@ -240,8 +253,11 @@ class Events extends ComponentBase {
                         $from = $firstDay->format('j.');
                     }
 
-                    $title = Lang::get('klubitus.calendar::lang.title.events_date',
-                        ['date' => $from . ' - ' . $lastDay->format('j.n.Y')]);
+                    $title = Lang::get('klubitus.calendar::lang.title.events_week', [
+                        'from' => $from,
+                        'to'   => $lastDay->format('j.n.Y'),
+                        'week' => ltrim($lastDay->format('W/Y'), 0)
+                    ]);
 
             }
 
