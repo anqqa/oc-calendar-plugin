@@ -4,25 +4,16 @@ use Carbon\Carbon;
 use Cms\Classes\ComponentBase;
 use Cms\Classes\Page;
 use Klubitus\Calendar\Models\Event as EventModel;
+use Lang;
 use October\Rain\Support\Collection;
 
 
 class Events extends ComponentBase {
 
-    const PERIOD_DAY   = 'day';
-    const PERIOD_WEEK  = 'week';
-    const PERIOD_MONTH = 'month';
-
-
     /**
      * @var  Carbon  Active date
      */
     public $date;
-
-    /**
-     * @var  string  Active date period: day, week, month
-     */
-    public $datePeriod;
 
     /**
      * @var  string  Event page name reference.
@@ -64,18 +55,6 @@ class Events extends ComponentBase {
                 'title'       => 'Pagination Page',
                 'description' => 'Page name for paginated events.',
                 'type'        => 'dropdown',
-            ],
-            'datePeriod' => [
-                'title'       => 'Event List Period',
-                'description' => 'Time period to list evens for given date.',
-                'default'     => 'week',
-                'type'        => 'dropdown',
-                'options'     => [
-                    self::PERIOD_DAY   => 'day',
-                    self::PERIOD_WEEK  => 'week',
-                    self::PERIOD_MONTH => 'month'
-                ],
-//                'group'       => 'Date',
             ],
             'day' => [
                 'title'             => 'Event List Day',
@@ -148,6 +127,12 @@ class Events extends ComponentBase {
 
 
     public function prepareVars() {
+
+        // @TODO: Move somewhere else! Now repeating here and there..
+        // Ensure current locale for localized titles
+        $locale = Lang::getLocale();
+        setlocale(LC_TIME, sprintf('%s_%s.UTF-8', $locale, strtoupper($locale)));
+
         $this->eventPage      = $this->page['eventPage']      = $this->property('eventPage');
         $this->paginationPage = $this->page['paginationPage'] = $this->property('paginationPage');
 
@@ -167,36 +152,38 @@ class Events extends ComponentBase {
 
         if ($day) {
             $previousDate = $date->copy()->subDay();
-            $previousText = 'Previous day';
+            $previousText = Lang::get('klubitus.calendar::lang.pagination.previous_day');
             $previousUrl  = $this->controller->pageUrl($this->paginationPage, [
                 'year'  => $previousDate->year,
                 'month' => $previousDate->month,
                 'day'   => $previousDate->day,
             ]);
             $nextDate = $date->copy()->addDay();
-            $nextText = 'Next day';
+            $nextText = Lang::get('klubitus.calendar::lang.pagination.next_day');
             $nextUrl  = $this->controller->pageUrl($this->paginationPage, [
                 'year'  => $nextDate->year,
                 'month' => $nextDate->month,
                 'day'   => $nextDate->day,
             ]);
 
-            $title = 'Events ' . $date->format("l, F j Y");
+            $title = Lang::get('klubitus.calendar::lang.title.events_date',
+                ['date' => $date->formatLocalized("%A, %e. %B %Y")]);
         } else if ($month) {
             $previousDate = $date->copy()->subMonth();
-            $previousText = 'Previous month';
+            $previousText = Lang::get('klubitus.calendar::lang.pagination.previous_month');
             $previousUrl  = $this->controller->pageUrl($this->paginationPage, [
                 'year'  => $previousDate->year,
                 'month' => $previousDate->month,
             ]);
             $nextDate = $date->copy()->addDay();
-            $nextText = 'Next month';
+            $nextText = Lang::get('klubitus.calendar::lang.pagination.next_month');
             $nextUrl  = $this->controller->pageUrl($this->paginationPage, [
                 'year'  => $nextDate->year,
                 'month' => $nextDate->month,
             ]);
 
-            $title = 'Events ' . $date->format("F Y");
+            $title = Lang::get('klubitus.calendar::lang.title.events_date',
+                ['date' => $date->formatLocalized("F Y")]);
         } else if ($week) {
             $date->startOfYear();
 
@@ -212,13 +199,13 @@ class Events extends ComponentBase {
             $date->startOfWeek();
 
             $previousDate = $date->copy()->subWeek();
-            $previousText = 'Previous week';
+            $previousText = Lang::get('klubitus.calendar::lang.pagination.previous_week');
             $previousUrl  = $this->controller->pageUrl($this->paginationPage, [
                 'year' => $previousDate->year,
                 'week' => $previousDate->weekOfYear,
             ]);
             $nextDate = $date->copy()->addWeek();
-            $nextText = 'Next week';
+            $nextText = Lang::get('klubitus.calendar::lang.pagination.next_week');
             $nextUrl  = $this->controller->pageUrl($this->paginationPage, [
                 'year' => $nextDate->year,
                 'week' => $nextDate->weekOfYear,
@@ -230,15 +217,15 @@ class Events extends ComponentBase {
             switch ($weekDate) {
 
                 case $thisWeek->format('Y-m-d'):
-                    $title = 'Events this week';
+                    $title = Lang::get('klubitus.calendar::lang.title.events_this_week');
                     break;
 
                 case $thisWeek->addWeek()->format('Y-m-d'):
-                    $title = 'Events next week';
+                    $title = Lang::get('klubitus.calendar::lang.title.events_next_week');
                     break;
 
                 case $thisWeek->subWeeks(2)->format('Y-m-d'):
-                    $title = 'Events last week';
+                    $title = Lang::get('klubitus.calendar::lang.title.events_last_week');
                     break;
 
                 default:
@@ -253,7 +240,8 @@ class Events extends ComponentBase {
                         $from = $firstDay->format('j.');
                     }
 
-                    $title = 'Events ' . $from . ' - ' . $lastDay->format('j.n.Y');
+                    $title = Lang::get('klubitus.calendar::lang.title.events_date',
+                        ['date' => $from . ' - ' . $lastDay->format('j.n.Y')]);
 
             }
 

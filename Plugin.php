@@ -1,8 +1,11 @@
 <?php namespace Klubitus\Calendar;
 
 use Backend;
+use Carbon\Carbon;
+use Event;
 use Illuminate\Console\Scheduling\Schedule;
 use Klubitus\Calendar\Models\Settings as CalendarSettings;
+use Lang;
 use October\Rain\Foundation\Application;
 use System\Classes\PluginBase;
 
@@ -16,7 +19,7 @@ class Plugin extends PluginBase {
         'Klubitus.BBCode',
         'Klubitus.Facebook',
         'Klubitus.Venue',
-        'RainLab.User'
+        'RainLab.User',
     ];
 
 
@@ -33,6 +36,22 @@ class Plugin extends PluginBase {
             'icon'        => 'icon-calendar',
             'homepage'    => 'https://github.com/anqqa/klubitus-octobercms-plugins',
         ];
+    }
+
+
+    public function boot() {
+
+        Event::listen('cms.page.beforeDisplay', function ($controller, $url, $page) {
+            if (!$page) {
+                return;
+            }
+
+            $locale = Lang::getLocale();
+
+            Carbon::setLocale($locale);
+
+            setlocale(LC_TIME, sprintf('%s_%s.UTF-8', $locale, strtoupper($locale)));
+        });
     }
 
 
@@ -55,9 +74,35 @@ class Plugin extends PluginBase {
 
 
     /**
+     * Registers CMS markup tags introduced by this plugin.
+     *
+     * @return  array
+     */
+    public function registerMarkupTags() {
+        return [
+            'filters' => [
+                'strftime' => function(Carbon $time, $format) {
+                    static $locale;
+
+                    if (!$locale) {
+                        $locale = Lang::getLocale();
+
+                        Carbon::setLocale($locale);
+
+                        setlocale(LC_TIME, sprintf('%s_%s.UTF-8', $locale, strtoupper($locale)));
+                    }
+
+                    return strftime($format, $time->getTimestamp());
+                },
+            ],
+        ];
+    }
+
+
+    /**
      * Registers back-end navigation items for this plugin.
      *
-     * @return array
+     * @return  array
      */
     public function registerNavigation() {
         return [
