@@ -119,6 +119,7 @@ class FacebookImporter {
 
             /** @var  EventModel  $upcomingEvent */
             foreach ($upcoming as $upcomingEvent) {
+                /** @var  EventModel  $existingEvent */
                 $existingEvent = $existing->first(function($key, EventModel $event) use ($upcomingEvent) {
                     return $event->facebook_id == $upcomingEvent->facebook_id
                         || ($event->url && strpos($event->url, $upcomingEvent->facebook_id));
@@ -142,7 +143,7 @@ class FacebookImporter {
 
                         $updated[$existingEvent->facebook_id] = $existingEvent;
 
-                        if ($save) {
+                        if ($save && $existingEvent->isDirty()) {
                             $existingEvent->save();
 
                             // @TODO: Move to newsfeed plugin
