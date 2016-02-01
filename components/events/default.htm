@@ -7,26 +7,33 @@
         {% if event.date != date %}
             {% set date = event.date %}
 
-            <h2>{{ event.begins_at|strftime("%A, %e. %B") }}</h2>
+            <h1>{{ event.begins_at|strftime("%A, %e. %B") }}</h1>
         {% endif %}
 
-        <article class="event">
-            <header>
-                <h1>
-                    <a href="{{ event.url }}">{{ event.name }}</a>
-                </h1>
-                <h2 class="event__location">
-                    {{ event.venue_name }}, {{ event.city_name }}
-                </h2>
-            </header>
+        <article class="event media">
+            {% spaceless %}
+            <div class="media__image">
+                {% if event.flyer_url %}
+                    <img src="{{ event.flyer_url }}" alt="">
+                {% endif %}
+            </div>
+            {% endspaceless %}
+            <div class="media__body">
+                <header>
+                    <h1>
+                        <a href="{{ event.url }}">{{ event.name }}</a>
+                        <small class="event__city">{{ event.city_name }}</small>
+                    </h1>
+                    <p class="event__location">
+                        {{ event.begins_at|date('H:i') }} - {{ event.ends_at|date('H:i') }}
+                        @ {{ event.venue_name }}
+                    </p>
+                </header>
 
-            <p class="event__info">
-                {{ event.info | bbcode }}
-            </p>
-
-            <p class="meta event__meta">
-                {{ event.music }}
-            </p>
+                <p class="meta event__meta">
+                    {{ event.music }}
+                </p>
+            </div>
         </article>
 
     {% endfor %}

@@ -10,7 +10,7 @@ return [
         'previous_week' => 'Previous week',
     ],
     'title' => [
-        'events_week' => ':from - :to (week :week)',
+        'events_week' => 'Week :week (:from - :to)',
         'events_last_week' => 'Events last week',
         'events_next_week' => 'Events next week',
         'events_this_week' => 'Events this week',

@@ -10,7 +10,7 @@ return [
         'previous_week' => 'Edellinen viikko',
     ],
     'title' => [
-        'events_week' => ':from - :to (viikko :week)',
+        'events_week' => 'Viikko :week (:from - :to)',
         'events_last_week' => 'Viime viikon tapahtumat',
         'events_next_week' => 'Ensi viikon tapahtumat',
         'events_this_week' => 'Tämän viikon tapahtumat',
