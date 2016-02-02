@@ -1,6 +1,12 @@
 <?php
 
 return [
+    'favorite' => [
+        'added' => '<i class="fa fa-heart"></i> Event added to favorites!',
+        'add_failed' => 'Could not add event to favorites..',
+        'removed' => '<i class="fa fa-heart-o"></i> Event removed from favorites.',
+        'remove_failed' => 'Could not remove event from favorites..',
+    ],
     'pagination' => [
         'next_day' => 'Next day',
         'next_month' => 'Next month',

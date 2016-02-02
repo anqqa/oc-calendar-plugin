@@ -56,9 +56,9 @@ class Event extends ComponentBase {
             $this->page['event'] = EventModel::findOrFail($eventId);
             $this->page['user'] = $user;
 
-            Flash::success(Lang::get('klubitus.calendar::lang.favorite_added'));
+            Flash::success(Lang::get('klubitus.calendar::lang.favorite.added'));
         } catch (Exception $e) {
-            Flash::error(Lang::get('klubitus.calendar::lang.favorite_add_failed'));
+            Flash::error(Lang::get('klubitus.calendar::lang.favorite.add_failed'));
         }
     }
 
@@ -82,9 +82,9 @@ class Event extends ComponentBase {
             $this->page['event'] = $event = EventModel::findOrFail($eventId);
             $this->page['user'] = $user;
 
-            Flash::success(Lang::get('klubitus.calendar::lang.favorite_removed'));
+            Flash::success(Lang::get('klubitus.calendar::lang.favorite.removed'));
         } catch (Exception $e) {
-            Flash::error(Lang::get('klubitus.calendar::lang.favorite_remove_failed'));
+            Flash::error(Lang::get('klubitus.calendar::lang.favorite.remove_failed'));
         }
     }
 

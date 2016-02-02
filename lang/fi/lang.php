@@ -1,6 +1,12 @@
 <?php
 
 return [
+    'favorite' => [
+        'added' => '<i class="fa fa-heart"></i> Tapahtuma lisätty suosikkeihin!',
+        'add_failed' => 'Tapahtuman lisääminen suosikkeihin epäonnistui..',
+        'removed' => '<i class="fa fa-heart-o"></i> Tapahtuma poistettu suosikeista.',
+        'remove_failed' => 'Tapahtuman poisto suosikeista epäonnistui..',
+    ],
     'pagination' => [
         'next_day' => 'Seuraava päivä',
         'next_month' => 'Seuraava kuukausi',
