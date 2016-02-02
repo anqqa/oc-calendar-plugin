@@ -3,6 +3,7 @@
 use Carbon\Carbon;
 use Db;
 use Facebook\GraphNodes\GraphPage;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Klubitus\Calendar\Models\Event as EventModel;
 use Klubitus\Facebook\Classes\GraphAPI;
 use Klubitus\Venue\Models\Venue as VenueModel;
@@ -10,6 +11,7 @@ use October\Rain\Database\ModelException;
 use October\Rain\Database\QueryBuilder;
 use October\Rain\Exception\SystemException;
 use October\Rain\Support\Collection;
+use Klubitus\Facebook\Models\UserExternal as UserExternalModel;
 use RainLab\User\Models\User as UserModel;
 
 
@@ -191,7 +193,19 @@ class FacebookImporter {
      * @throws  SystemException
      */
     protected function updateEvent(EventModel $event, $save) {
-        $accessToken = GraphAPI::instance()->getAppAccessToken();
+        static $accessToken;
+
+        if (!$accessToken) {
+            try {
+                $externalUser = UserExternalModel::where('user_id', $this->importUserId)
+                    ->where('provider', UserExternalModel::PROVIDER_FACEBOOK)
+                    ->firstOrFail();
+                
+                $accessToken = $externalUser->token;
+            } catch (ModelNotFoundException $e) {
+                $accessToken = GraphAPI::instance()->getAppAccessToken();
+            }
+        }
 
         try {
             $response = GraphAPI::instance()->get('/' . $event->facebook_id,
