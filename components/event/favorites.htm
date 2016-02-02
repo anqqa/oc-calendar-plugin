@@ -1,0 +1,4 @@
+{% if event.favorite_count %}
+<i class="fa fa-heart"></i>
+{{ ':count favorite|:count favorites'|__(event.favorite_count, { count: event.favorite_count }) }}
+{% endif %}

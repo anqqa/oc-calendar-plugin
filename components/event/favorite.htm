@@ -1,0 +1,19 @@
+{% if user %}
+    {% if event.isFavorite %}
+<button class="button"
+        data-request="onRemoveFavorite"
+        data-request-data="id: '{{ event.id }}'"
+        data-request-update="'{{ __SELF__ }}::favorite': '#favorite-button', '{{ __SELF__ }}::favorites': '.event__favorites'">
+    <i class="fa fa-heart-o"></i>
+    {{ 'Remove favorite'|_ }}
+</button>
+    {% else %}
+<button class="button button--primary"
+        data-request="onAddFavorite"
+        data-request-data="id: '{{ event.id }}'"
+        data-request-update="'{{ __SELF__ }}::favorite': '#favorite-button', '{{ __SELF__ }}::favorites': '.event__favorites'">
+    <i class="fa fa-heart"></i>
+    {{ 'Add to favorites'|_ }}
+</button>
+    {% endif %}
+{% endif %}

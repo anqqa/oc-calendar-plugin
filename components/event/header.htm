@@ -3,10 +3,10 @@
         <img src="{{ event.flyer_url }}" alt="">
     {% endif %}
 
-    <h2>{{ event.begins_at|strftime('%A, %e. %B') }}</h2>
+    <h2>{{ event.begins_at|strftime('%A, %e. %B %Y') }}</h2>
     <h1>{{ event.name }}</h1>
 
-    <p>
+    <p class="event__location">
         {{ event.venue_name }} {{ event.city_name }}<br>
         {{ event.begins_at|date('H:i') }} - {{ event.ends_at|date('H:i') }}
 
@@ -30,7 +30,15 @@
         {% endif %}
     </p>
 
+    <p class="event__favorites">
+        {% partial __SELF__~"::favorites" %}
+    </p>
+
     <nav>
+        <span id="favorite-button">
+            {% partial __SELF__~"::favorite" %}
+        </span>
+
         {% if event.url %}
             <a class="button" href="{{ event.url }}" target="_blank">
                 {% if event.url matches '/facebook\\.com\\/event/' %}

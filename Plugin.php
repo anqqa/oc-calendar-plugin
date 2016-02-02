@@ -40,7 +40,6 @@ class Plugin extends PluginBase {
 
 
     public function boot() {
-
         Event::listen('cms.page.beforeDisplay', function ($controller, $url, $page) {
             if (!$page) {
                 return;

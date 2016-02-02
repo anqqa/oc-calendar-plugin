@@ -1,6 +1,7 @@
 <?php namespace Klubitus\Calendar\Models;
 
 use ApplicationException;
+use Auth;
 use Carbon\Carbon;
 use Cms\Classes\Controller;
 use Illuminate\Support\Facades\DB;
@@ -9,6 +10,7 @@ use October\Rain\Database\QueryBuilder;
 use October\Rain\Database\Traits\Revisionable;
 use October\Rain\Database\Traits\Validation;
 use October\Rain\Support\Str;
+use RainLab\User\Models\User as UserModel;
 
 
 /**
@@ -21,11 +23,6 @@ class Event extends Model {
      * @var  string  The database table used by the model.
      */
     public $table = 'events';
-
-    /**
-     * @var  array  Guarded fields
-     */
-    protected $guarded = [];
 
     /**
      * @var  array  Fillable fields
@@ -58,7 +55,6 @@ class Event extends Model {
     /**
      * @var array Relations
      */
-    public $hasOne = [];
     public $hasMany = [
         'favorites' => 'Klubitus\Calendar\Models\Favorite',
     ];
@@ -66,9 +62,6 @@ class Event extends Model {
         'author' => 'RainLab\User\Models\User',
         'venue'  => 'Klubitus\Venue\Models\Venue',
     ];
-    public $belongsToMany = [];
-    public $morphTo = [];
-    public $morphOne = [];
     public $morphMany = [
         'revision_history' => ['System\Models\Revision', 'name' => 'revisionable'],
     ];
@@ -87,6 +80,25 @@ class Event extends Model {
         'flyer_url'       => 'url',
         'flyer_front_url' => 'url',
     ];
+
+
+    /**
+     * Has the user added this event to their favorites.
+     *
+     * @param  UserModel  $user
+     * @return  bool
+     */
+    public function isFavorite(UserModel $user = null) {
+        if (!$user) {
+            $user = Auth::getUser();
+        }
+
+        if (!$user) {
+            return false;
+        }
+
+        return $this->favorites()->where('user_id', $user->id)->count() > 0;
+    }
 
 
     /**
