@@ -1,0 +1,46 @@
+<header>
+    {% if event.flyer_url %}
+        <img src="{{ event.flyer_url }}" alt="">
+    {% endif %}
+
+    <h2>{{ event.begins_at|strftime('%A, %e. %B') }}</h2>
+    <h1>{{ event.name }}</h1>
+
+    <p>
+        {{ event.venue_name }} {{ event.city_name }}<br>
+        {{ event.begins_at|date('H:i') }} - {{ event.ends_at|date('H:i') }}
+
+        {% if event.ticket_url or event.price %}
+            | <i class="fa fa-ticket"></i>
+            {% if event.price %}
+                {{ event.price }}
+
+                {% if event.price_currency == 'EUR' %}
+                    €
+                {% elseif event.price_currency == 'FIM' %}
+                    mk
+                {% else %}
+                    {{ event.price_currency }}
+                {% endif %}
+            {% endif %}
+
+            {% if event.ticket_url %}
+                <a href="{{ event.ticket_url }}" target="_blank">{{ 'Buy tickets'|_ }}</a>
+            {% endif %}
+        {% endif %}
+    </p>
+
+    <nav>
+        {% if event.url %}
+            <a class="button" href="{{ event.url }}" target="_blank">
+                {% if event.url matches '/facebook\\.com\\/event/' %}
+                    <i class="fa fa-facebook"></i>
+                    {{ 'Facebook event'|_ }}
+                {% else %}
+                    <i class="fa fa-link"></i>
+                    {{ 'Homepage'|_ }}
+                {% endif %}
+            </a>
+        {% endif %}
+    </nav>
+</header>

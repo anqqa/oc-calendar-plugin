@@ -67,6 +67,7 @@ class Plugin extends PluginBase {
      */
     public function registerComponents() {
         return [
+            'Klubitus\Calendar\Components\Event'     => 'calendarEvent',
             'Klubitus\Calendar\Components\Events'    => 'calendarEvents',
             'Klubitus\Calendar\Components\EventList' => 'calendarEventList',
         ];

@@ -71,7 +71,6 @@ class Events extends ComponentBase {
                 'default'           => '{{ :day }}',
                 'type'              => 'string',
                 'validationPattern' => '^[0-3]?[0-9]$',
-//                'group'             => 'Date',
             ],
             'week' => [
                 'title'             => 'Event List Week',
@@ -79,7 +78,6 @@ class Events extends ComponentBase {
                 'default'           => '{{ :week }}',
                 'type'              => 'string',
                 'validationPattern' => '^[0-5]?[0-9]$',
-//                'group'             => 'Date',
             ],
             'month' => [
                 'title'             => 'Event List Month',
@@ -87,7 +85,6 @@ class Events extends ComponentBase {
                 'default'           => '{{ :month }}',
                 'type'              => 'string',
                 'validationPattern' => '^[0-1]?[0-9]$',
-//                'group'             => 'Date',
             ],
             'year' => [
                 'title'             => 'Event List Year',
@@ -95,7 +92,6 @@ class Events extends ComponentBase {
                 'default'           => '{{ :year }}',
                 'type'              => 'string',
                 'validationPattern' => '^[0-3][0-9]{3}$',
-//                'group'             => 'Date',
             ],
         ];
     }

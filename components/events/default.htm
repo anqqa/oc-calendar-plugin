@@ -7,7 +7,7 @@
         {% if event.date != date %}
             {% set date = event.date %}
 
-            <h1>{{ event.begins_at|strftime("%A, %e. %B") }}</h1>
+            <h1>{{ event.begins_at|strftime('%A, %e. %B') }}</h1>
         {% endif %}
 
         <article class="event media">

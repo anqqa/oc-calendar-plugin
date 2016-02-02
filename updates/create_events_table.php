@@ -20,6 +20,7 @@ class CreateEventsTable extends Migration {
             $table->string('ticket_url')->nullable();
             $table->integer('age')->nullable();
             $table->decimal('price', 5, 2)->nullable();
+            $table->string('price_currency', 3)->default('EUR')->nullable();
             $table->text('info')->nullable();
             $table->text('music')->nullable();
             $table->integer('flyer_id')->nullable(); // @TODO: Move to flyers plugin
