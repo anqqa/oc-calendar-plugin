@@ -27,14 +27,16 @@ class Favorite extends Model {
 
 
     public function afterCreate() {
+        $this->event->timestamps = false;
         $this->event->favorite_count++;
-        $this->event->save(['timestamps' => false]);
+        $this->event->save();
     }
 
 
     public function afterDelete() {
+        $this->event->timestamps = false;
         $this->event->favorite_count--;
-        $this->event->save(['timestamps' => false]);
+        $this->event->save();
     }
 
 }
