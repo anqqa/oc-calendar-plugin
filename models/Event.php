@@ -9,7 +9,7 @@ use Model;
 use October\Rain\Database\QueryBuilder;
 use October\Rain\Database\Traits\Revisionable;
 use October\Rain\Database\Traits\Validation;
-use October\Rain\Support\Str;
+use Str;
 use RainLab\User\Models\User as UserModel;
 
 
@@ -218,6 +218,7 @@ class Event extends Model {
      *
      * @param  string      $pageName
      * @param  Controller  $controller
+     * @return  string
      */
     public function setUrl($pageName, Controller $controller) {
         $params = [
