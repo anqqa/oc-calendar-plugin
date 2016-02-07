@@ -13,7 +13,7 @@ class CreateEventsTable extends Migration {
             $table->timestamps();
             $table->timestamp('begins_at');
             $table->timestamp('ends_at');
-            $table->foreign('author_id')->references('id')->on('users');
+            $table->integer('author_id')->nullable();
 
             $table->string('name');
             $table->string('url')->nullable();
@@ -39,6 +39,7 @@ class CreateEventsTable extends Migration {
             $table->bigInteger('facebook_id')->nullable()->unique();
             $table->string('facebook_organizer')->nullable();
 
+            $table->foreign('author_id')->references('id')->on('users');
             $table->index(['begins_at', 'ends_at'], 'event_time');
         });
     }
