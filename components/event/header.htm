@@ -42,10 +42,10 @@
         {% if event.url %}
             <a class="button" href="{{ event.url }}" target="_blank">
                 {% if event.url matches '/facebook\\.com\\/event/' %}
-                    <i class="fa fa-facebook"></i>
+                    <i class="fa fa-fw fa-facebook"></i>
                     {{ 'Facebook event'|_ }}
                 {% else %}
-                    <i class="fa fa-link"></i>
+                    <i class="fa fa-fw fa-link"></i>
                     {{ 'Homepage'|_ }}
                 {% endif %}
             </a>
