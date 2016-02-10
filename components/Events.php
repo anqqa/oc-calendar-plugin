@@ -112,7 +112,16 @@ class Events extends ComponentBase {
         }
 
         /** @var  Collection  $events */
-        $events = EventModel::week($this->date)->get();
+        switch ($this->datePeriod) {
+            case self::PERIOD_WEEK:
+                $events = EventModel::with('flyers.image')
+                    ->week($this->date)
+                    ->get();
+                break;
+
+            default:
+                return [];
+        }
 
         // Add date and url
         $events->each(function(EventModel $event) {

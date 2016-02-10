@@ -92,7 +92,7 @@ class Event extends ComponentBase {
     public function onRun() {
         $this->page['event']
             = $this->event
-            = EventModel::with('venue')->findOrFail((int)$this->property('id'));
+            = EventModel::with('flyers.image', 'venue')->findOrFail((int)$this->property('id'));
     }
 
 

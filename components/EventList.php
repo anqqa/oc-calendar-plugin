@@ -19,7 +19,7 @@ class EventList extends ComponentBase {
     public $eventPage;
 
     /**
-     * @var  Klubitus\Calendar\Models\Event  Event collection cache.
+     * @var  Collection  Event collection cache.
      */
     public $events;
 
@@ -64,12 +64,8 @@ class EventList extends ComponentBase {
     }
 
 
-    public function getPropertyOptions($property) {
-        if ($property == 'eventPage') {
-            return Page::sortBy('baseFileName')->lists('baseFileName', 'baseFileName');
-        }
-
-        return self::getPropertyOptions($property);
+    public function getEventPageOptions() {
+        return ['' => '- none -'] + Page::sortBy('baseFileName')->lists('baseFileName', 'baseFileName');
     }
 
 
@@ -106,8 +102,9 @@ class EventList extends ComponentBase {
 
     public function onRun() {
         $this->eventPage = $this->property('eventPage');
-        $this->events    = $this->listEvents();
         $this->title     = $this->property('listTitle');
+
+        $this->events    = $this->listEvents();
     }
 
 }

@@ -1,5 +1,7 @@
 <header>
-    {% if event.flyer_url %}
+    {% if event.flyers|length %}
+        <img src="{{ event.flyers.first.image.path }}" alt="">
+    {% elseif event.flyer_url %}
         <img src="{{ event.flyer_url }}" alt="">
     {% endif %}
 
