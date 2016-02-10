@@ -34,7 +34,7 @@ class Plugin extends PluginBase {
             'description' => 'Events calendar for Klubitus.',
             'author'      => 'Antti Qvickström',
             'icon'        => 'icon-calendar',
-            'homepage'    => 'https://github.com/anqqa/klubitus-octobercms-plugins',
+            'homepage'    => 'https://github.com/anqqa/oc-calendar-plugin',
         ];
     }
 
