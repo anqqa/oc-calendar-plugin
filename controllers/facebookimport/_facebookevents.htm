@@ -54,15 +54,17 @@
                     <?= $event->facebook_organizer ?>
                 </td>
                 <td>
-                    <?php if (isset($added[$event->facebook_id])): ?>
-                    <span class="oc-icon-angle-double-up text-success">Added</span>
-                    <?php elseif (isset($updated[$event->facebook_id])): ?>
-                    <span class="oc-icon-angle-up text-info">Updated</span>
-                    <?php elseif (isset($skipped[$event->facebook_id])): ?>
-                    <span class="oc-icon-angle-down text-muted">Skipped</span>
-                    <?php else: ?>
-                    <span class="oc-icon-angle-double-down text-danger">Ignored</span>
-                    <?php endif; ?>
+                    <nobr>
+                        <?php if (isset($added[$event->facebook_id])): ?>
+                        <span class="oc-icon-angle-double-up text-success">Added</span>
+                        <?php elseif (isset($updated[$event->facebook_id])): ?>
+                        <span class="oc-icon-angle-up text-info">Updated</span>
+                        <?php elseif (isset($skipped[$event->facebook_id])): ?>
+                        <span class="oc-icon-angle-down text-muted">Skipped</span>
+                        <?php else: ?>
+                        <span class="oc-icon-angle-double-down text-danger">Ignored</span>
+                        <?php endif; ?>
+                    </nobr>
                 </td>
             </tr>
         <?php endforeach ?>
