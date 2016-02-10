@@ -5,7 +5,9 @@ use Db;
 use Facebook\GraphNodes\GraphPage;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Klubitus\Calendar\Models\Event as EventModel;
+use Klubitus\Calendar\Models\Flyer as FlyerModel;
 use Klubitus\Facebook\Classes\GraphAPI;
+use Klubitus\Gallery\Models\File as FileModel;
 use Klubitus\Venue\Models\Venue as VenueModel;
 use October\Rain\Database\ModelException;
 use October\Rain\Database\QueryBuilder;
@@ -200,7 +202,7 @@ class FacebookImporter {
                 $externalUser = UserExternalModel::where('user_id', $this->importUserId)
                     ->where('provider', UserExternalModel::PROVIDER_FACEBOOK)
                     ->firstOrFail();
-                
+
                 $accessToken = $externalUser->token;
             } catch (ModelNotFoundException $e) {
                 $accessToken = GraphAPI::instance()->getAppAccessToken();
@@ -217,17 +219,43 @@ class FacebookImporter {
         }
 
         $eventObject = $response->getGraphEvent();
-        $coverObject = $eventObject->getCover();
-
         $event->info = $eventObject->getDescription();
         $event->ticket_url = $eventObject->getTicketUri();
 
-        // Don't update flyer if the current is uploaded rather than linked
-        if (!$event->flyer_id) {
-            $event->flyer_url = $event->flyer_front_url = $coverObject->getSource();
-        }
+        $coverObject = $eventObject->getCover();
+        $this->updateFlyer($event, $coverObject->getSource(), $save);
 
         return $this->updateVenue($event, $eventObject->getPlace(), $save);
+    }
+
+
+    protected function updateFlyer(EventModel $event, $url, $save = false) {
+        if ($url && $event->flyer_url != $url) {
+            $event->flyer_url = $event->flyer_front_url = $url;
+
+            if ($event->flyer_id) {
+                $flyer = FlyerModel::find($event->flyer_id);
+            }
+            else if (!$event->id || !$flyer = $event->flyers->first()) {
+                $flyer = FlyerModel::make([
+                    'author_id' => $this->importUserId,
+                    'event'     => $event,
+                ]);
+            }
+
+            $flyer->fill([
+                'name'      => $event->name,
+                'begins_at' => $event->begins_at,
+            ]);
+
+            if ($save) {
+                Db::transaction(function() use ($event, $flyer, $url) {
+                    $event->save();
+                    $flyer->save();
+                    $flyer->image()->create(['data' => $url]);
+                });
+            }
+        }
     }
 
 

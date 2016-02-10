@@ -57,6 +57,7 @@ class Event extends Model {
      */
     public $hasMany = [
         'favorites' => 'Klubitus\Calendar\Models\Favorite',
+        'flyers'    => 'Klubitus\Calendar\Models\Flyer',
     ];
     public $belongsTo = [
         'author' => 'RainLab\User\Models\User',
@@ -65,8 +66,6 @@ class Event extends Model {
     public $morphMany = [
         'revision_history' => ['System\Models\Revision', 'name' => 'revisionable'],
     ];
-    public $attachOne = [];
-    public $attachMany = [];
 
     /**
      * @var  array  Validation rules
