@@ -253,6 +253,8 @@ class FacebookImporter {
                     $event->save();
                     $flyer->save();
                     $flyer->image()->create(['data' => $url]);
+                    $event->flyer_front_url = url($flyer->image->getPath());
+                    $event->save();
                 });
             }
         }
