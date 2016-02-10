@@ -222,42 +222,17 @@ class FacebookImporter {
         $event->info = $eventObject->getDescription();
         $event->ticket_url = $eventObject->getTicketUri();
 
-        $coverObject = $eventObject->getCover();
-        $this->updateFlyer($event, $coverObject->getSource(), $save);
+        if ($save) {
+            $coverObject = $eventObject->getCover();
 
-        return $this->updateVenue($event, $eventObject->getPlace(), $save);
-    }
+            if ($coverObject->getSource()) {
+                $event->save();
 
-
-    protected function updateFlyer(EventModel $event, $url, $save = false) {
-        if ($url && $event->flyer_url != $url) {
-            $event->flyer_url = $event->flyer_front_url = $url;
-
-            if ($event->flyer_id) {
-                $flyer = FlyerModel::find($event->flyer_id);
-            }
-            else if (!$event->id || !$flyer = $event->flyers->first()) {
-                $flyer = FlyerModel::make([
-                    'author_id' => $this->importUserId,
-                    'event'     => $event,
-                ]);
-            }
-
-            $flyer->fill([
-                'name'      => $event->name,
-                'begins_at' => $event->begins_at,
-            ]);
-
-            if ($save) {
-                Db::transaction(function() use ($event, $flyer, $url) {
-                    $event->save();
-                    $flyer->save();
-                    $flyer->image()->create(['data' => $url]);
-                    $event->flyer_front_url = url($flyer->image->getPath());
-                    $event->save();
-                });
+                $event->importFlyer($coverObject->getSource(), true);
             }
         }
+
+        return $this->updateVenue($event, $eventObject->getPlace(), $save);
     }
 
 
@@ -288,8 +263,8 @@ class FacebookImporter {
 
                 if ($locationObject) {
                     $query->orWhere(function($query) use ($placeObject, $locationObject) {
-                        $query->where(DB::raw('lower(name)'), '=', strtolower($placeObject->getName()))
-                            ->where(DB::raw('lower(city_name)'), '=', strtolower($locationObject->getCity()));
+                        $query->where(DB::raw('lower(name)'), mb_strtolower($placeObject->getName()))
+                            ->where(DB::raw('lower(city_name)'), mb_strtolower($locationObject->getCity()));
                     });
                 }
 

@@ -1,5 +1,7 @@
 <?php namespace Klubitus\Calendar\Models;
 
+use Db;
+use Klubitus\Calendar\Models\Event as EventModel;
 use Model;
 
 
@@ -35,5 +37,29 @@ class Flyer extends Model {
     public $attachOne = [
         'image' => 'Klubitus\Gallery\Models\File'
     ];
+
+
+    /**
+     * Import flyer from url to event.
+     *
+     * @param  EventModel  $event
+     * @param  string      $url
+     * @param  Flyer       $flyer  Replaced flyer
+     * @return  static
+     */
+    public static function importToEvent(EventModel $event, $url, Flyer $flyer = null) {
+        $flyer = $flyer ?: new static;
+        $flyer->author_id = $event->author_id;
+        $flyer->event_id  = $event->id;
+        $flyer->name      = $event->name;
+        $flyer->begins_at = $event->begins_at;
+
+        Db::transaction(function() use ($flyer, $url) {
+            $flyer->save();
+            $flyer->image()->create(['data' => $url]);
+        });
+
+        return $flyer;
+    }
 
 }

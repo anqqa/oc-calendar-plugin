@@ -5,6 +5,7 @@ use Auth;
 use Carbon\Carbon;
 use Cms\Classes\Controller;
 use Illuminate\Support\Facades\DB;
+use Klubitus\Calendar\Models\Flyer as FlyerModel;
 use Model;
 use October\Rain\Database\QueryBuilder;
 use October\Rain\Database\Traits\Revisionable;
@@ -79,6 +80,47 @@ class Event extends Model {
         'flyer_url'       => 'url',
         'flyer_front_url' => 'url',
     ];
+
+
+    /**
+     * Import flyer from url.
+     *
+     * @param  string  $url
+     * @param  bool    $replace
+     */
+    public function importFlyer($url = null, $replace = false) {
+        $existingFlyer = null;
+
+        if ($replace) {
+            $existingFlyer = $this->flyers->first();
+
+            // @TODO: Backwards compatibility, remove when Anqh is killed
+            if (!$existingFlyer && $this->flyer_id) {
+                $existingFlyer = FlyerModel::find($this->flyer_id);
+            }
+        }
+
+        if ($url && $url != $this->flyer_url) {
+
+            // Import flyer from new url
+            $flyerUrl = $url;
+
+        }
+        else if (!$url && $this->flyer_url) {
+
+            // Import flyer from existing url
+            $flyerUrl = $this->flyer_url;
+
+        }
+
+        if (isset($flyerUrl)) {
+            $flyer = FlyerModel::importToEvent($this, $flyerUrl, $existingFlyer);
+
+            $this->flyer_url = $flyerUrl;
+            $this->flyer_front_url = url($flyer->image->getPath());
+            $this->save();
+        }
+    }
 
 
     /**
