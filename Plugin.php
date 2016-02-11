@@ -108,7 +108,7 @@ class Plugin extends PluginBase {
         return [
             'calendar' => [
                 'label'       => 'Calendar',
-                'url'         => Backend::url('klubitus/calendar/facebookimport'),
+                'url'         => Backend::url('klubitus/calendar/import'),
                 'icon'        => 'icon-calendar',
                 'permissions' => ['klubitus.calendar.*'],
                 'order'       => 100,

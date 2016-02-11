@@ -1,0 +1,43 @@
+<div class="form-group switch-field">
+    <div class="field-switch">
+        <label>Automatic import</label>
+        <p class="help-block"><?= $importUrl ?></p>
+    </div>
+    <label class="custom-switch">
+        <input type="checkbox" disabled <?= $importEnabled ? 'checked' : ''?>>
+        <span><span>On</span><span>Off</span></span>
+        <a class="slide-button"></a>
+    </label>
+</div>
+
+<hr>
+
+<div class="control-toolbar">
+    <div class="toolbar-item toolbar-primary">
+
+        <a href="#results"
+           class="btn btn-primary oc-icon-download"
+           data-request="onFacebookImport"
+           data-request-update="facebookevents: '#results'">Import events</a>
+
+        <a href="#results"
+           class="btn btn-default oc-icon-download"
+           data-request="onFacebookImportTest"
+           data-request-update="facebookevents: '#results'">Import events (dry run)</a>
+
+        <a href="#results"
+           title="Import event flyers with only remote url"
+           class="btn btn-default oc-icon-download"
+           data-request="onFlyerImport"
+           data-request-update="flyerimports: '#results'">Import flyers</a>
+
+<!--
+        <a href="#results"
+           class="btn btn-default oc-icon-download"
+           data-request="onFlyerImportTest"
+           data-request-update="flyerimports: '#results'">Import flyers (dry run)</a>
+-->
+    </div>
+</div>
+
+<div id="results"></div>

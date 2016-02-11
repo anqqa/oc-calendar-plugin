@@ -1,0 +1,38 @@
+<table class="table data">
+    <thead>
+        <tr>
+            <th><span>Id</span></th>
+            <th><span>Date</span></th>
+            <th><span>Name</span></th>
+            <th><span>Flyer url</span></th>
+            <th><span>Action</span></th>
+        </tr>
+    </thead>
+    <tbody>
+
+        <?php foreach ($events as $event): ?>
+        <tr>
+            <td><?= $event->id ?></td>
+            <td>
+                <nobr>
+                    <?= $event->begins_at->toFormattedDateString() ?><br>
+                </nobr>
+            </td>
+            <td><?= $event->name ?></td>
+            <td><?= $event->flyer_url ?></td>
+            <td>
+                <nobr>
+                    <?php if (isset($imported[$event->id])): ?>
+                    <span class="oc-icon-angle-double-up text-success">Imported</span>
+                    <?php elseif (isset($cleaned[$event->id])): ?>
+                    <span class="oc-icon-angle-up text-info">Cleaned</span>
+                    <?php elseif (isset($failed[$event->id])): ?>
+                    <span class="oc-icon-angle-down text-muted">Failed</span>
+                    <?php endif; ?>
+                </nobr>
+            </td>
+        </tr>
+        <?php endforeach ?>
+
+    </tbody>
+</table>

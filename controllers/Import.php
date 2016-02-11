@@ -4,15 +4,17 @@ use BackendMenu;
 use Backend\Classes\Controller;
 use Flash;
 use Klubitus\Calendar\Classes\FacebookImporter;
+use Klubitus\Calendar\Models\Event as EventModel;
 use Klubitus\Calendar\Models\Settings as CalendarSettings;
 use RainLab\User\Models\User as UserModel;
+use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 use System\Classes\SettingsManager;
 
 
 /**
- * Facebook Import Back-end Controller
+ * (Facebook) Import Back-end Controller
  */
-class FacebookImport extends Controller {
+class Import extends Controller {
 
     /**
      * @var  bool
@@ -33,7 +35,7 @@ class FacebookImport extends Controller {
     public function __construct() {
         parent::__construct();
 
-        BackendMenu::setContext('Klubitus.Calendar', 'calendar', 'facebookimport');
+        BackendMenu::setContext('Klubitus.Calendar', 'calendar', 'import');
         SettingsManager::setContext('Klubitus.Calendar', 'settings');
 
         $this->vars['importEnabled'] = $this->importEnabled = (bool)CalendarSettings::get('facebook_import_enabled');
@@ -74,6 +76,52 @@ class FacebookImport extends Controller {
 
     public function index_onFacebookImportTest() {
         $this->index_onFacebookImport(false);
+    }
+
+
+    public function index_onFlyerImport($save = true) {
+        $events = EventModel::whereNotNull('flyer_url')
+            ->has('flyers', '=', 0)
+            ->limit(10)
+            ->get();
+
+        $cleaned  = [];
+        $imported = [];
+        $failed   = [];
+
+        /** @var  EventModel  $event */
+        foreach ($events as $event) {
+            $event->timestamps = false;
+
+            if (trim($event->flyer_url) == '') {
+                $event->flyer_url = null;
+
+                $cleaned[$event->id] = $event;
+            }
+            else {
+                try {
+                    $save and $event->importFlyer();
+
+                    $imported[$event->id] = $event;
+                }
+                catch (FileNotFoundException $e) {
+                    $failed[$event->id] = $event;
+                }
+
+            }
+
+            $save and $event->forceSave();
+        }
+
+        $this->vars['events']   = $events;
+        $this->vars['cleaned']  = $cleaned;
+        $this->vars['imported'] = $imported;
+        $this->vars['failed']   = $failed;
+    }
+
+
+    public function index_onFlyerImportTest() {
+        $this->index_onFlyerImport(false);
     }
 
 }

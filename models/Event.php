@@ -4,7 +4,7 @@ use ApplicationException;
 use Auth;
 use Carbon\Carbon;
 use Cms\Classes\Controller;
-use Illuminate\Support\Facades\DB;
+use Db;
 use Klubitus\Calendar\Models\Flyer as FlyerModel;
 use Model;
 use October\Rain\Database\QueryBuilder;
@@ -18,7 +18,8 @@ use RainLab\User\Models\User as UserModel;
  * Event Model
  */
 class Event extends Model {
-    use Revisionable, Validation;
+    use Revisionable;
+    use Validation;
 
     /**
      * @var  string  The database table used by the model.
@@ -87,6 +88,7 @@ class Event extends Model {
      *
      * @param  string  $url
      * @param  bool    $replace
+     * @return  bool
      */
     public function importFlyer($url = null, $replace = false) {
         $existingFlyer = null;
@@ -114,12 +116,17 @@ class Event extends Model {
         }
 
         if (isset($flyerUrl)) {
-            $flyer = FlyerModel::importToEvent($this, $flyerUrl, $existingFlyer);
+            return Db::transaction(function() use ($flyerUrl, $existingFlyer) {
+                $flyer = FlyerModel::importToEvent($this, $flyerUrl, $existingFlyer);
 
-            $this->flyer_url = $flyerUrl;
-            $this->flyer_front_url = url($flyer->image->getPath());
-            $this->save();
+                $this->flyer_url = $flyerUrl;
+                $this->flyer_front_url = url($flyer->image->getPath());
+
+                return $this->save();
+            });
         }
+
+        return false;
     }
 
 
