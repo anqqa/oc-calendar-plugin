@@ -120,7 +120,7 @@ class Plugin extends PluginBase {
     public function registerSchedule($schedule) {
         /** @var  Schedule  $schedule */
         $schedule->command('klubitus:facebookimport --save')
-            ->everyTenMinutes()
+            ->everyThirtyMinutes()
             ->when(function() {
                 return (bool)CalendarSettings::get('facebook_import_enabled');
             })
