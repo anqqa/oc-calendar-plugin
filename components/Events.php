@@ -116,6 +116,7 @@ class Events extends ComponentBase {
             case self::PERIOD_WEEK:
                 $events = EventModel::with('flyers.image')
                     ->week($this->date)
+                    ->orderDefault()
                     ->get();
                 break;
 

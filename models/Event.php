@@ -161,9 +161,7 @@ class Event extends Model {
     public function scopeBetween($query, Carbon $from, Carbon $to) {
         return $query
             ->where('begins_at', '<=', $to)
-            ->where('ends_at', '>=', $from->copy()->addHours(5)) // Only get after 5am
-            ->orderBy(DB::raw("date_trunc('day', begins_at)"), 'ASC')
-            ->orderBy('city_name', 'ASC');
+            ->where('ends_at', '>=', $from->copy()->addHours(5)); // Only get after 5am
     }
 
 
@@ -187,6 +185,19 @@ class Event extends Model {
      */
     public function scopeLatest($query) {
         return $query->orderBy('id', 'DESC');
+    }
+
+
+    /**
+     * Order events by date and city.
+     *
+     * @param   QueryBuilder  $query
+     * @return  QueryBuilder
+     */
+    public function scopeOrderDefault($query) {
+        return $query
+            ->orderBy(DB::raw("date_trunc('day', begins_at)"), 'ASC')
+            ->orderBy('city_name', 'ASC');
     }
 
 
