@@ -1,8 +1,11 @@
 <?php namespace Klubitus\Calendar\Models;
 
+use Cms\Classes\Controller;
 use Db;
 use Klubitus\Calendar\Models\Event as EventModel;
 use Model;
+use October\Rain\Database\QueryBuilder;
+use Str;
 
 
 /**
@@ -60,6 +63,33 @@ class Flyer extends Model {
         });
 
         return $flyer;
+    }
+
+
+    /**
+     * Get latest models.
+     *
+     * @param   QueryBuilder  $query
+     * @return  QueryBuilder
+     */
+    public function scopeRecentFlyers($query) {
+        return $query->orderBy('created_at', 'desc');
+    }
+
+
+    /**
+     * Set current object url.
+     *
+     * @param  string      $pageName
+     * @param  Controller  $controller
+     * @return  string
+     */
+    public function setUrl($pageName, Controller $controller) {
+        $params = [
+            'flyer_id' => $this->id . '-' . Str::slug($this->name)
+        ];
+
+        return $this->url = $controller->pageUrl($pageName, $params);
     }
 
 }
