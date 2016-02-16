@@ -112,22 +112,37 @@ END) AS month
      * @return  QueryBuilder
      */
     public function scopeDate($query, $year, $month = null, $day = null) {
-        $from = Carbon::create($year, $month ?: 1, $day ?: 1)->startOfDay();
+        if (!$year) {
 
-        if ($day) {
-            $to = $from->copy()->addDay();
+            // Unknown year
+            $query->whereNull('begins_at');
+
         }
-        else if ($month) {
-            $to = $from->copy()->addMonth();
+        else if ($month === 0 || $month === '0') {
+
+            // Unknown month
+            $query->where('begins_at', Carbon::create($year, 1, 1, 0, 0, 0));
+
         }
         else {
-            $to = $from->copy()->addYear();
+            $from = Carbon::create($year, $month ?: 1, $day ?: 1)->startOfDay();
+
+            if ($day) {
+                $to = $from->copy()->addDay();
+            }
+            else if ($month) {
+                $to = $from->copy()->addMonth();
+            }
+            else {
+                $to = $from->copy()->addYear();
+            }
+
+            $query
+                ->whereBetween('begins_at', [$from, $to->subSecond()])
+                ->orderBy(Db::raw("DATE_TRUNC('day', begins_at)"), 'ASC', 'ASC');
         }
 
-        return $query
-            ->whereBetween('begins_at', [$from, $to->subSecond()])
-            ->orderBy(Db::raw("DATE_TRUNC('day', begins_at)"), 'ASC', 'ASC')
-            ->orderBy('name', 'ASC');
+        return $query->orderBy('name', 'ASC');
     }
 
 
