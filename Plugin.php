@@ -81,7 +81,7 @@ class Plugin extends PluginBase {
     public function registerMarkupTags() {
         return [
             'filters' => [
-                'strftime' => function(Carbon $time, $format) {
+                'strftime' => function($time, $format) {
                     static $locale;
 
                     if (!$locale) {
@@ -90,6 +90,10 @@ class Plugin extends PluginBase {
                         Carbon::setLocale($locale);
 
                         setlocale(LC_TIME, sprintf('%s_%s.UTF-8', $locale, strtoupper($locale)));
+                    }
+
+                    if (!$time instanceof Carbon) {
+                        $time = new Carbon($time);
                     }
 
                     return strftime($format, $time->getTimestamp());

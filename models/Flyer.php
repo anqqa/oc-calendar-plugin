@@ -1,5 +1,6 @@
 <?php namespace Klubitus\Calendar\Models;
 
+use Carbon\Carbon;
 use Cms\Classes\Controller;
 use Db;
 use Klubitus\Calendar\Models\Event as EventModel;
@@ -42,6 +43,41 @@ class Flyer extends Model {
     ];
 
 
+    public static function countsPerMonth() {
+        $months = Db::table('flyers')
+            ->select(
+                Db::raw("
+(CASE
+    WHEN begins_at IS NULL THEN '0000 00'
+    WHEN TO_CHAR(begins_at, 'DDD HH24 MI') = '001 00 00' THEN TO_CHAR(begins_at, 'YYYY 00')
+    ELSE TO_CHAR(begins_at, 'YYYY MM')
+END) AS month
+"),
+                Db::raw('COUNT(1) AS month_count')
+            )
+            ->groupBy('month')
+            ->orderBy('month', 'DESC')
+            ->lists('month_count', 'month');
+
+        $counts = [];
+        foreach ($months as $date => $count) {
+            list($year, $month) = explode(' ', $date);
+            $year  = (int)$year;
+            $month = (int)$month;
+            $count = (int)$count;
+
+            if (!isset($counts[$year])) {
+                $counts[$year] = [$month => $count];
+            }
+            else {
+                $counts[$year][$month] = $count;
+            }
+        }
+
+        return $counts;
+    }
+
+
     /**
      * Import flyer from url to event.
      *
@@ -63,6 +99,35 @@ class Flyer extends Model {
         });
 
         return $flyer;
+    }
+
+
+    /**
+     * Get models by date.
+     *
+     * @param   QueryBuilder  $query
+     * @param   int           $year
+     * @param   int           $month
+     * @param   int           $day
+     * @return  QueryBuilder
+     */
+    public function scopeDate($query, $year, $month = null, $day = null) {
+        $from = Carbon::create($year, $month ?: 1, $day ?: 1)->startOfDay();
+
+        if ($day) {
+            $to = $from->copy()->addDay();
+        }
+        else if ($month) {
+            $to = $from->copy()->addMonth();
+        }
+        else {
+            $to = $from->copy()->addYear();
+        }
+
+        return $query
+            ->whereBetween('begins_at', [$from, $to->subSecond()])
+            ->orderBy(Db::raw("DATE_TRUNC('day', begins_at)"), 'ASC', 'ASC')
+            ->orderBy('name', 'ASC');
     }
 
 
@@ -89,7 +154,7 @@ class Flyer extends Model {
             'flyer_id' => $this->id . '-' . Str::slug($this->name)
         ];
 
-        return $this->url = $controller->pageUrl($pageName, $params);
+        return $this->url = $controller->pageUrl($pageName, $params, false);
     }
 
 }

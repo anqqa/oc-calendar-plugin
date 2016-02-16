@@ -196,7 +196,7 @@ class Event extends Model {
      */
     public function scopeOrderDefault($query) {
         return $query
-            ->orderBy(DB::raw("date_trunc('day', begins_at)"), 'ASC')
+            ->orderBy(DB::raw("DATE_TRUNC('day', begins_at)"), 'ASC')
             ->orderBy('city_name', 'ASC');
     }
 
@@ -284,7 +284,7 @@ class Event extends Model {
             'event_id' => $this->id . '-' . Str::slug($this->name)
         ];
 
-        return $this->url = $controller->pageUrl($pageName, $params);
+        return $this->url = $controller->pageUrl($pageName, $params, false);
     }
 
 }
