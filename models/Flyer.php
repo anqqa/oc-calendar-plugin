@@ -158,6 +158,30 @@ END) AS month
 
 
     /**
+     * Search models
+     *
+     * @param   QueryBuilder  $query
+     * @param   string        $search
+     * @return  QueryBuilder
+     */
+    public function scopeSearch($query, $search) {
+        $search = trim($search);
+
+        if (strlen($search)) {
+            $query->where(function($query) use ($search) {
+                $query->whereHas('event', function($query) use ($search) {
+                   $query->searchWhere($search, ['name', 'venue_name']);
+                });
+
+                $query->orSearchWhere($search, ['name']);
+            });
+        }
+
+        return $query;
+    }
+
+
+    /**
      * Set current object url.
      *
      * @param  string      $pageName
