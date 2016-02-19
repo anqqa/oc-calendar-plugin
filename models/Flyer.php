@@ -168,12 +168,57 @@ END) AS month
         $search = trim($search);
 
         if (strlen($search)) {
-            $query->where(function($query) use ($search) {
-                $query->whereHas('event', function($query) use ($search) {
-                   $query->searchWhere($search, ['name', 'venue_name']);
-                });
 
-                $query->orSearchWhere($search, ['name']);
+            // Parse search
+            $name = [];
+            $venue = [];
+            $city = [];
+
+            $words = explode(' ', mb_strtolower($search));
+            foreach ($words as $word) {
+                $tokens = explode(':', $word, 2);
+
+                // Defaults to event name
+                if (count($tokens) == 1) {
+                    $name[] = $word;
+
+                    continue;
+                }
+
+                switch ($tokens[0]) {
+                    case 'city':
+                    case 'in':
+                        $city[] = $tokens[1];
+                        break;
+
+                    case 'venue':
+                    case 'at':
+                        $venue[] = $tokens[1];
+                        break;
+
+                    default:
+                        $name[] = $word;
+                }
+            }
+
+            $query->where(function($query) use ($name, $venue, $city) {
+                if ($name) {
+                    $query->searchWhere(implode(' ', $name), 'name');
+                }
+
+                $query->whereHas('event', function($query) use ($name, $venue, $city) {
+                    if ($name) {
+                        $query->searchWhere(implode(' ', $name), 'name');
+                    }
+
+                    if ($venue) {
+                        $query->searchWhere(implode(' ', $venue), 'venue_name');
+                    }
+
+                    if ($city) {
+                        $query->searchWhere(implode(' ', $city), 'city_name');
+                    }
+                });
             });
         }
 
