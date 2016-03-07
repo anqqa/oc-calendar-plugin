@@ -13,6 +13,7 @@ class CreateFlyersTable extends Migration {
             $table->integer('event_id')->nullable();
             $table->string('name')->nullable();
             $table->timestamp('begins_at');
+            $table->integer('comment_count')->default(0);
         });
     }
 

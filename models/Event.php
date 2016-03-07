@@ -137,7 +137,7 @@ class Event extends Model {
      * @return  bool
      */
     public function isFavorite(UserModel $user = null) {
-        if (!$user) {
+        if (is_null($user)) {
             $user = Auth::getUser();
         }
 

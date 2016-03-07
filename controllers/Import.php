@@ -81,7 +81,7 @@ class Import extends Controller {
 
     public function index_onFlyerImport($save = true) {
         $events = EventModel::whereNotNull('flyer_url')
-            ->has('flyers', '=', 0)
+            ->has('flyers', 0)
             ->limit(10)
             ->get();
 

@@ -15,28 +15,33 @@ use Str;
 class Flyer extends Model {
 
     /**
-     * @var string The database table used by the model.
+     * @var  string  The database table used by the model.
      */
     public $table = 'flyers';
 
     /**
-     * @var array Guarded fields
+     * @var  array  Guarded fields
      */
     protected $guarded = [];
 
     /**
-     * @var array Fillable fields
+     * @var  array  Fillable fields
      */
     protected $fillable = ['image', 'event', 'author', 'author_id', 'begins_at', 'name'];
 
     protected $dates = ['begins_at'];
 
     /**
-     * @var array Relations
+     * @var  array  Relations
      */
     public $belongsTo = [
         'event'  => 'Klubitus\Calendar\Models\Event',
         'author' => 'RainLab\User\Models\User',
+
+        'legacyImage' => ['Klubitus\Gallery\Models\LegacyImage', 'key' => 'image_id'],
+    ];
+    public $morphMany = [
+        'comments' => ['Klubitus\Comment\Models\Comment', 'name' => 'commentable'],
     ];
     public $attachOne = [
         'image' => 'Klubitus\Gallery\Models\File'

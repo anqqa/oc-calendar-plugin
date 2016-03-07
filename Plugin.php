@@ -17,6 +17,7 @@ class Plugin extends PluginBase {
 
     public $require = [
         'Klubitus.BBCode',
+        'Klubitus.Comment',
         'Klubitus.Facebook',
         'Klubitus.Venue',
         'RainLab.User',
