@@ -23,7 +23,9 @@ class VCalendar {
         $vcalendar = $skipCache ? null : Cache::get($cacheKey);
 
         if (!$vcalendar) {
-            $response = Http::get($url);
+            $response = Http::get($url, function(Http $http) {
+                $http->setOption(CURLOPT_USERAGENT, 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.0 Safari/537.36');
+            });
 
             if ($response->code != 200) {
                 throw new SystemException('Could not load vcalendar from URL', $response->code);
