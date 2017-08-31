@@ -225,7 +225,7 @@ class FacebookImporter {
         if ($save) {
             $coverObject = $eventObject->getCover();
 
-            if ($coverObject->getSource()) {
+            if ($coverObject && $coverObject->getSource()) {
                 $event->save();
 
                 $event->importFlyer($coverObject->getSource(), true);
