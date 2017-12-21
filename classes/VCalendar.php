@@ -138,7 +138,7 @@ class VCalendar {
             'ends_at'            => $eventArray['DTEND'],
             'info'               => $eventArray['DESCRIPTION'] ?: null,
             'updated_at'         => $eventArray['DTSTAMP'],
-            'venue_name'         => $eventArray['LOCATION'] ?: null,
+            'venue_name'         => isset($eventArray['LOCATION']) ? ($eventArray['LOCATION'] ?: null) : null,
             'facebook_id'        => $eventArray['ID'],
             'facebook_organizer' => $eventArray['ORGANIZER']['properties']['CN'],
             'price'              => null,
